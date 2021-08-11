@@ -1,0 +1,2164 @@
+Grammar
+
+    0 $accept: program $end
+
+    1 $@1: %empty
+
+    2 program: $@1 declarations functions
+
+    3 declarations: declarations declaration
+    4             | %empty
+
+    5 declaration: decl_var
+    6            | decl_struct
+
+    7 $@2: %empty
+
+    8 decl_var: type $@2 list_var PYC
+
+    9 list_var: list_var COMA var
+   10         | var
+
+   11 var: ID
+
+   12 $@3: %empty
+
+   13 type: base $@3 arreglo
+
+   14 base: INT
+   15     | VOID
+
+   16 arreglo: LCOR NUMERO RCOR arreglo
+   17        | %empty
+
+   18 $@4: %empty
+
+   19 $@5: %empty
+
+   20 decl_struct: STRUCT LKEY $@4 body_struct RKEY $@5 list_var PYC
+
+   21 body_struct: body_struct def_mem
+   22            | def_mem
+
+   23 def_mem: base ID PYC
+
+   24 functions: functions function
+   25          | function
+
+   26 $@6: %empty
+
+   27 function: FUNC base ID LPAR $@6 list_args RPAR LKEY local_decls bloqueSentencias RKEY
+
+   28 list_args: args
+   29          | %empty
+
+   30 args: args COMA arg
+   31     | arg
+
+   32 arg: base ID
+
+   33 local_decls: local_decls local_decl
+   34            | %empty
+
+   35 local_decl: base local_list PYC
+
+   36 local_list: local_list COMA local
+   37           | local
+
+   38 local: ID
+
+   39 bloqueSentencias: sentencias
+   40                 | %empty
+
+   41 sentencias: sentencias sentencia
+   42           | sentencia
+
+   43 sentencia: sentIf
+   44          | sentWhile
+   45          | sentAsig
+   46          | sentPutw
+   47          | sentPuts
+   48          | sentBreak
+   49          | sentProc
+   50          | sentReturn
+
+   51 sentReturn: RETURN expresion PYC
+
+   52 sentProc: ID LPAR list_params RPAR PYC
+
+   53 list_params: params
+   54            | %empty
+
+   55 params: params COMA param
+   56       | param
+
+   57 param: expresion
+
+   58 expresion: expresion MAS expresion
+   59          | expresion MENOS expresion
+   60          | expresion MUL expresion
+   61          | expresion DIV expresion
+   62          | expresion MOD expresion
+   63          | LPAR expresion RPAR
+   64          | NUMERO
+   65          | ID complemento
+
+   66 complemento: DOT ID
+   67            | array
+   68            | LPAR list_params RPAR
+   69            | %empty
+
+   70 array: array LCOR expresion RCOR
+   71      | LCOR expresion RCOR
+
+   72 condicion: condicion OR condicion
+   73          | condicion AND condicion
+   74          | expresion EQUAL expresion
+   75          | expresion DISTINCT expresion
+   76          | expresion GT expresion
+   77          | expresion LT expresion
+   78          | expresion GTE expresion
+   79          | expresion LTE expresion
+   80          | NOT condicion
+   81          | LPAR condicion RPAR
+
+   82 sentIf: IF LPAR condicion RPAR bloqueOSentencia sentElse
+
+   83 sentElse: ELSE bloqueOSentencia
+   84         | %empty
+
+   85 bloqueOSentencia: LKEY bloqueSentencias RKEY
+   86                 | sentencia
+
+   87 sentWhile: WHILE LPAR condicion RPAR bloqueOSentencia
+
+   88 sentAsig: left_part ASIG expresion PYC
+
+   89 left_part: ID
+   90          | ID array
+   91          | ID DOT ID
+
+   92 sentPutw: PRINT LPAR expresion RPAR PYC
+
+   93 sentPuts: PRINT LPAR STRING RPAR PYC
+
+   94 sentBreak: BREAK PYC
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    ID <std::string> (258) 11 23 27 32 38 52 65 66 89 90 91
+    NUMERO <std::string> (259) 16 64
+    STRING <std::string> (260) 93
+    IF (261) 82
+    WHILE (262) 87
+    PRINT (263) 92 93
+    BREAK (264) 94
+    FUNC (265) 27
+    INT (266) 14
+    VOID (267) 15
+    RETURN (268) 51
+    STRUCT (269) 20
+    LKEY (270) 20 27 85
+    RKEY (271) 20 27 85
+    PYC (272) 8 20 23 35 51 52 88 92 93 94
+    COMA (273) 9 30 36 55
+    ASIG (274) 88
+    OR (275) 72
+    AND (276) 73
+    EQUAL (277) 74
+    DISTINCT (278) 75
+    LT (279) 77
+    GT (280) 76
+    LTE (281) 79
+    GTE (282) 78
+    MAS (283) 58
+    MENOS (284) 59
+    MUL (285) 60
+    DIV (286) 61
+    MOD (287) 62
+    LCOR (288) 16 70 71
+    RCOR (289) 16 70 71
+    NOT (290) 80
+    DOT (291) 66 91
+    LPAR (292) 27 52 63 68 81 82 87 92 93
+    RPAR (293) 27 52 63 68 81 82 87 92 93
+    IFX (294)
+    ELSE (295) 83
+
+
+Nonterminals, with rules where they appear
+
+    $accept (41)
+        on left: 0
+    program (42)
+        on left: 2
+        on right: 0
+    $@1 (43)
+        on left: 1
+        on right: 2
+    declarations (44)
+        on left: 3 4
+        on right: 2 3
+    declaration (45)
+        on left: 5 6
+        on right: 3
+    decl_var (46)
+        on left: 8
+        on right: 5
+    $@2 (47)
+        on left: 7
+        on right: 8
+    list_var (48)
+        on left: 9 10
+        on right: 8 9 20
+    var (49)
+        on left: 11
+        on right: 9 10
+    type <int> (50)
+        on left: 13
+        on right: 8
+    $@3 (51)
+        on left: 12
+        on right: 13
+    base <int> (52)
+        on left: 14 15
+        on right: 13 23 27 32 35
+    arreglo <int> (53)
+        on left: 16 17
+        on right: 13 16
+    decl_struct (54)
+        on left: 20
+        on right: 6
+    $@4 (55)
+        on left: 18
+        on right: 20
+    $@5 (56)
+        on left: 19
+        on right: 20
+    body_struct (57)
+        on left: 21 22
+        on right: 20 21
+    def_mem (58)
+        on left: 23
+        on right: 21 22
+    functions (59)
+        on left: 24 25
+        on right: 2 24
+    function (60)
+        on left: 27
+        on right: 24 25
+    $@6 (61)
+        on left: 26
+        on right: 27
+    list_args (62)
+        on left: 28 29
+        on right: 27
+    args (63)
+        on left: 30 31
+        on right: 28 30
+    arg (64)
+        on left: 32
+        on right: 30 31
+    local_decls (65)
+        on left: 33 34
+        on right: 27 33
+    local_decl (66)
+        on left: 35
+        on right: 33
+    local_list (67)
+        on left: 36 37
+        on right: 35 36
+    local (68)
+        on left: 38
+        on right: 36 37
+    bloqueSentencias (69)
+        on left: 39 40
+        on right: 27 85
+    sentencias (70)
+        on left: 41 42
+        on right: 39 41
+    sentencia (71)
+        on left: 43 44 45 46 47 48 49 50
+        on right: 41 42 86
+    sentReturn (72)
+        on left: 51
+        on right: 50
+    sentProc (73)
+        on left: 52
+        on right: 49
+    list_params (74)
+        on left: 53 54
+        on right: 52 68
+    params (75)
+        on left: 55 56
+        on right: 53 55
+    param (76)
+        on left: 57
+        on right: 55 56
+    expresion (77)
+        on left: 58 59 60 61 62 63 64 65
+        on right: 51 57 58 59 60 61 62 63 70 71 74 75 76 77 78 79 88 92
+    complemento (78)
+        on left: 66 67 68 69
+        on right: 65
+    array (79)
+        on left: 70 71
+        on right: 67 70 90
+    condicion (80)
+        on left: 72 73 74 75 76 77 78 79 80 81
+        on right: 72 73 80 81 82 87
+    sentIf (81)
+        on left: 82
+        on right: 43
+    sentElse (82)
+        on left: 83 84
+        on right: 82
+    bloqueOSentencia (83)
+        on left: 85 86
+        on right: 82 83 87
+    sentWhile (84)
+        on left: 87
+        on right: 44
+    sentAsig (85)
+        on left: 88
+        on right: 45
+    left_part (86)
+        on left: 89 90 91
+        on right: 88
+    sentPutw (87)
+        on left: 92
+        on right: 46
+    sentPuts (88)
+        on left: 93
+        on right: 47
+    sentBreak (89)
+        on left: 94
+        on right: 48
+
+
+State 0
+
+    0 $accept: • program $end
+
+    $default  reduce using rule 1 ($@1)
+
+    program  go to state 1
+    $@1      go to state 2
+
+
+State 1
+
+    0 $accept: program • $end
+
+    $end  shift, and go to state 3
+
+
+State 2
+
+    2 program: $@1 • declarations functions
+
+    $default  reduce using rule 4 (declarations)
+
+    declarations  go to state 4
+
+
+State 3
+
+    0 $accept: program $end •
+
+    $default  accept
+
+
+State 4
+
+    2 program: $@1 declarations • functions
+    3 declarations: declarations • declaration
+
+    FUNC    shift, and go to state 5
+    INT     shift, and go to state 6
+    VOID    shift, and go to state 7
+    STRUCT  shift, and go to state 8
+
+    declaration  go to state 9
+    decl_var     go to state 10
+    type         go to state 11
+    base         go to state 12
+    decl_struct  go to state 13
+    functions    go to state 14
+    function     go to state 15
+
+
+State 5
+
+   27 function: FUNC • base ID LPAR $@6 list_args RPAR LKEY local_decls bloqueSentencias RKEY
+
+    INT   shift, and go to state 6
+    VOID  shift, and go to state 7
+
+    base  go to state 16
+
+
+State 6
+
+   14 base: INT •
+
+    $default  reduce using rule 14 (base)
+
+
+State 7
+
+   15 base: VOID •
+
+    $default  reduce using rule 15 (base)
+
+
+State 8
+
+   20 decl_struct: STRUCT • LKEY $@4 body_struct RKEY $@5 list_var PYC
+
+    LKEY  shift, and go to state 17
+
+
+State 9
+
+    3 declarations: declarations declaration •
+
+    $default  reduce using rule 3 (declarations)
+
+
+State 10
+
+    5 declaration: decl_var •
+
+    $default  reduce using rule 5 (declaration)
+
+
+State 11
+
+    8 decl_var: type • $@2 list_var PYC
+
+    $default  reduce using rule 7 ($@2)
+
+    $@2  go to state 18
+
+
+State 12
+
+   13 type: base • $@3 arreglo
+
+    $default  reduce using rule 12 ($@3)
+
+    $@3  go to state 19
+
+
+State 13
+
+    6 declaration: decl_struct •
+
+    $default  reduce using rule 6 (declaration)
+
+
+State 14
+
+    2 program: $@1 declarations functions •
+   24 functions: functions • function
+
+    FUNC  shift, and go to state 5
+
+    $default  reduce using rule 2 (program)
+
+    function  go to state 20
+
+
+State 15
+
+   25 functions: function •
+
+    $default  reduce using rule 25 (functions)
+
+
+State 16
+
+   27 function: FUNC base • ID LPAR $@6 list_args RPAR LKEY local_decls bloqueSentencias RKEY
+
+    ID  shift, and go to state 21
+
+
+State 17
+
+   20 decl_struct: STRUCT LKEY • $@4 body_struct RKEY $@5 list_var PYC
+
+    $default  reduce using rule 18 ($@4)
+
+    $@4  go to state 22
+
+
+State 18
+
+    8 decl_var: type $@2 • list_var PYC
+
+    ID  shift, and go to state 23
+
+    list_var  go to state 24
+    var       go to state 25
+
+
+State 19
+
+   13 type: base $@3 • arreglo
+
+    LCOR  shift, and go to state 26
+
+    $default  reduce using rule 17 (arreglo)
+
+    arreglo  go to state 27
+
+
+State 20
+
+   24 functions: functions function •
+
+    $default  reduce using rule 24 (functions)
+
+
+State 21
+
+   27 function: FUNC base ID • LPAR $@6 list_args RPAR LKEY local_decls bloqueSentencias RKEY
+
+    LPAR  shift, and go to state 28
+
+
+State 22
+
+   20 decl_struct: STRUCT LKEY $@4 • body_struct RKEY $@5 list_var PYC
+
+    INT   shift, and go to state 6
+    VOID  shift, and go to state 7
+
+    base         go to state 29
+    body_struct  go to state 30
+    def_mem      go to state 31
+
+
+State 23
+
+   11 var: ID •
+
+    $default  reduce using rule 11 (var)
+
+
+State 24
+
+    8 decl_var: type $@2 list_var • PYC
+    9 list_var: list_var • COMA var
+
+    PYC   shift, and go to state 32
+    COMA  shift, and go to state 33
+
+
+State 25
+
+   10 list_var: var •
+
+    $default  reduce using rule 10 (list_var)
+
+
+State 26
+
+   16 arreglo: LCOR • NUMERO RCOR arreglo
+
+    NUMERO  shift, and go to state 34
+
+
+State 27
+
+   13 type: base $@3 arreglo •
+
+    $default  reduce using rule 13 (type)
+
+
+State 28
+
+   27 function: FUNC base ID LPAR • $@6 list_args RPAR LKEY local_decls bloqueSentencias RKEY
+
+    $default  reduce using rule 26 ($@6)
+
+    $@6  go to state 35
+
+
+State 29
+
+   23 def_mem: base • ID PYC
+
+    ID  shift, and go to state 36
+
+
+State 30
+
+   20 decl_struct: STRUCT LKEY $@4 body_struct • RKEY $@5 list_var PYC
+   21 body_struct: body_struct • def_mem
+
+    INT   shift, and go to state 6
+    VOID  shift, and go to state 7
+    RKEY  shift, and go to state 37
+
+    base     go to state 29
+    def_mem  go to state 38
+
+
+State 31
+
+   22 body_struct: def_mem •
+
+    $default  reduce using rule 22 (body_struct)
+
+
+State 32
+
+    8 decl_var: type $@2 list_var PYC •
+
+    $default  reduce using rule 8 (decl_var)
+
+
+State 33
+
+    9 list_var: list_var COMA • var
+
+    ID  shift, and go to state 23
+
+    var  go to state 39
+
+
+State 34
+
+   16 arreglo: LCOR NUMERO • RCOR arreglo
+
+    RCOR  shift, and go to state 40
+
+
+State 35
+
+   27 function: FUNC base ID LPAR $@6 • list_args RPAR LKEY local_decls bloqueSentencias RKEY
+
+    INT   shift, and go to state 6
+    VOID  shift, and go to state 7
+
+    $default  reduce using rule 29 (list_args)
+
+    base       go to state 41
+    list_args  go to state 42
+    args       go to state 43
+    arg        go to state 44
+
+
+State 36
+
+   23 def_mem: base ID • PYC
+
+    PYC  shift, and go to state 45
+
+
+State 37
+
+   20 decl_struct: STRUCT LKEY $@4 body_struct RKEY • $@5 list_var PYC
+
+    $default  reduce using rule 19 ($@5)
+
+    $@5  go to state 46
+
+
+State 38
+
+   21 body_struct: body_struct def_mem •
+
+    $default  reduce using rule 21 (body_struct)
+
+
+State 39
+
+    9 list_var: list_var COMA var •
+
+    $default  reduce using rule 9 (list_var)
+
+
+State 40
+
+   16 arreglo: LCOR NUMERO RCOR • arreglo
+
+    LCOR  shift, and go to state 26
+
+    $default  reduce using rule 17 (arreglo)
+
+    arreglo  go to state 47
+
+
+State 41
+
+   32 arg: base • ID
+
+    ID  shift, and go to state 48
+
+
+State 42
+
+   27 function: FUNC base ID LPAR $@6 list_args • RPAR LKEY local_decls bloqueSentencias RKEY
+
+    RPAR  shift, and go to state 49
+
+
+State 43
+
+   28 list_args: args •
+   30 args: args • COMA arg
+
+    COMA  shift, and go to state 50
+
+    $default  reduce using rule 28 (list_args)
+
+
+State 44
+
+   31 args: arg •
+
+    $default  reduce using rule 31 (args)
+
+
+State 45
+
+   23 def_mem: base ID PYC •
+
+    $default  reduce using rule 23 (def_mem)
+
+
+State 46
+
+   20 decl_struct: STRUCT LKEY $@4 body_struct RKEY $@5 • list_var PYC
+
+    ID  shift, and go to state 23
+
+    list_var  go to state 51
+    var       go to state 25
+
+
+State 47
+
+   16 arreglo: LCOR NUMERO RCOR arreglo •
+
+    $default  reduce using rule 16 (arreglo)
+
+
+State 48
+
+   32 arg: base ID •
+
+    $default  reduce using rule 32 (arg)
+
+
+State 49
+
+   27 function: FUNC base ID LPAR $@6 list_args RPAR • LKEY local_decls bloqueSentencias RKEY
+
+    LKEY  shift, and go to state 52
+
+
+State 50
+
+   30 args: args COMA • arg
+
+    INT   shift, and go to state 6
+    VOID  shift, and go to state 7
+
+    base  go to state 41
+    arg   go to state 53
+
+
+State 51
+
+    9 list_var: list_var • COMA var
+   20 decl_struct: STRUCT LKEY $@4 body_struct RKEY $@5 list_var • PYC
+
+    PYC   shift, and go to state 54
+    COMA  shift, and go to state 33
+
+
+State 52
+
+   27 function: FUNC base ID LPAR $@6 list_args RPAR LKEY • local_decls bloqueSentencias RKEY
+
+    $default  reduce using rule 34 (local_decls)
+
+    local_decls  go to state 55
+
+
+State 53
+
+   30 args: args COMA arg •
+
+    $default  reduce using rule 30 (args)
+
+
+State 54
+
+   20 decl_struct: STRUCT LKEY $@4 body_struct RKEY $@5 list_var PYC •
+
+    $default  reduce using rule 20 (decl_struct)
+
+
+State 55
+
+   27 function: FUNC base ID LPAR $@6 list_args RPAR LKEY local_decls • bloqueSentencias RKEY
+   33 local_decls: local_decls • local_decl
+
+    ID      shift, and go to state 56
+    IF      shift, and go to state 57
+    WHILE   shift, and go to state 58
+    PRINT   shift, and go to state 59
+    BREAK   shift, and go to state 60
+    INT     shift, and go to state 6
+    VOID    shift, and go to state 7
+    RETURN  shift, and go to state 61
+
+    $default  reduce using rule 40 (bloqueSentencias)
+
+    base              go to state 62
+    local_decl        go to state 63
+    bloqueSentencias  go to state 64
+    sentencias        go to state 65
+    sentencia         go to state 66
+    sentReturn        go to state 67
+    sentProc          go to state 68
+    sentIf            go to state 69
+    sentWhile         go to state 70
+    sentAsig          go to state 71
+    left_part         go to state 72
+    sentPutw          go to state 73
+    sentPuts          go to state 74
+    sentBreak         go to state 75
+
+
+State 56
+
+   52 sentProc: ID • LPAR list_params RPAR PYC
+   89 left_part: ID •
+   90          | ID • array
+   91          | ID • DOT ID
+
+    LCOR  shift, and go to state 76
+    DOT   shift, and go to state 77
+    LPAR  shift, and go to state 78
+
+    $default  reduce using rule 89 (left_part)
+
+    array  go to state 79
+
+
+State 57
+
+   82 sentIf: IF • LPAR condicion RPAR bloqueOSentencia sentElse
+
+    LPAR  shift, and go to state 80
+
+
+State 58
+
+   87 sentWhile: WHILE • LPAR condicion RPAR bloqueOSentencia
+
+    LPAR  shift, and go to state 81
+
+
+State 59
+
+   92 sentPutw: PRINT • LPAR expresion RPAR PYC
+   93 sentPuts: PRINT • LPAR STRING RPAR PYC
+
+    LPAR  shift, and go to state 82
+
+
+State 60
+
+   94 sentBreak: BREAK • PYC
+
+    PYC  shift, and go to state 83
+
+
+State 61
+
+   51 sentReturn: RETURN • expresion PYC
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    expresion  go to state 87
+
+
+State 62
+
+   35 local_decl: base • local_list PYC
+
+    ID  shift, and go to state 88
+
+    local_list  go to state 89
+    local       go to state 90
+
+
+State 63
+
+   33 local_decls: local_decls local_decl •
+
+    $default  reduce using rule 33 (local_decls)
+
+
+State 64
+
+   27 function: FUNC base ID LPAR $@6 list_args RPAR LKEY local_decls bloqueSentencias • RKEY
+
+    RKEY  shift, and go to state 91
+
+
+State 65
+
+   39 bloqueSentencias: sentencias •
+   41 sentencias: sentencias • sentencia
+
+    ID      shift, and go to state 56
+    IF      shift, and go to state 57
+    WHILE   shift, and go to state 58
+    PRINT   shift, and go to state 59
+    BREAK   shift, and go to state 60
+    RETURN  shift, and go to state 61
+
+    $default  reduce using rule 39 (bloqueSentencias)
+
+    sentencia   go to state 92
+    sentReturn  go to state 67
+    sentProc    go to state 68
+    sentIf      go to state 69
+    sentWhile   go to state 70
+    sentAsig    go to state 71
+    left_part   go to state 72
+    sentPutw    go to state 73
+    sentPuts    go to state 74
+    sentBreak   go to state 75
+
+
+State 66
+
+   42 sentencias: sentencia •
+
+    $default  reduce using rule 42 (sentencias)
+
+
+State 67
+
+   50 sentencia: sentReturn •
+
+    $default  reduce using rule 50 (sentencia)
+
+
+State 68
+
+   49 sentencia: sentProc •
+
+    $default  reduce using rule 49 (sentencia)
+
+
+State 69
+
+   43 sentencia: sentIf •
+
+    $default  reduce using rule 43 (sentencia)
+
+
+State 70
+
+   44 sentencia: sentWhile •
+
+    $default  reduce using rule 44 (sentencia)
+
+
+State 71
+
+   45 sentencia: sentAsig •
+
+    $default  reduce using rule 45 (sentencia)
+
+
+State 72
+
+   88 sentAsig: left_part • ASIG expresion PYC
+
+    ASIG  shift, and go to state 93
+
+
+State 73
+
+   46 sentencia: sentPutw •
+
+    $default  reduce using rule 46 (sentencia)
+
+
+State 74
+
+   47 sentencia: sentPuts •
+
+    $default  reduce using rule 47 (sentencia)
+
+
+State 75
+
+   48 sentencia: sentBreak •
+
+    $default  reduce using rule 48 (sentencia)
+
+
+State 76
+
+   71 array: LCOR • expresion RCOR
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    expresion  go to state 94
+
+
+State 77
+
+   91 left_part: ID DOT • ID
+
+    ID  shift, and go to state 95
+
+
+State 78
+
+   52 sentProc: ID LPAR • list_params RPAR PYC
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    $default  reduce using rule 54 (list_params)
+
+    list_params  go to state 96
+    params       go to state 97
+    param        go to state 98
+    expresion    go to state 99
+
+
+State 79
+
+   70 array: array • LCOR expresion RCOR
+   90 left_part: ID array •
+
+    LCOR  shift, and go to state 100
+
+    $default  reduce using rule 90 (left_part)
+
+
+State 80
+
+   82 sentIf: IF LPAR • condicion RPAR bloqueOSentencia sentElse
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    NOT     shift, and go to state 101
+    LPAR    shift, and go to state 102
+
+    expresion  go to state 103
+    condicion  go to state 104
+
+
+State 81
+
+   87 sentWhile: WHILE LPAR • condicion RPAR bloqueOSentencia
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    NOT     shift, and go to state 101
+    LPAR    shift, and go to state 102
+
+    expresion  go to state 103
+    condicion  go to state 105
+
+
+State 82
+
+   92 sentPutw: PRINT LPAR • expresion RPAR PYC
+   93 sentPuts: PRINT LPAR • STRING RPAR PYC
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    STRING  shift, and go to state 106
+    LPAR    shift, and go to state 86
+
+    expresion  go to state 107
+
+
+State 83
+
+   94 sentBreak: BREAK PYC •
+
+    $default  reduce using rule 94 (sentBreak)
+
+
+State 84
+
+   65 expresion: ID • complemento
+
+    LCOR  shift, and go to state 76
+    DOT   shift, and go to state 108
+    LPAR  shift, and go to state 109
+
+    $default  reduce using rule 69 (complemento)
+
+    complemento  go to state 110
+    array        go to state 111
+
+
+State 85
+
+   64 expresion: NUMERO •
+
+    $default  reduce using rule 64 (expresion)
+
+
+State 86
+
+   63 expresion: LPAR • expresion RPAR
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    expresion  go to state 112
+
+
+State 87
+
+   51 sentReturn: RETURN expresion • PYC
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+
+    PYC    shift, and go to state 113
+    MAS    shift, and go to state 114
+    MENOS  shift, and go to state 115
+    MUL    shift, and go to state 116
+    DIV    shift, and go to state 117
+    MOD    shift, and go to state 118
+
+
+State 88
+
+   38 local: ID •
+
+    $default  reduce using rule 38 (local)
+
+
+State 89
+
+   35 local_decl: base local_list • PYC
+   36 local_list: local_list • COMA local
+
+    PYC   shift, and go to state 119
+    COMA  shift, and go to state 120
+
+
+State 90
+
+   37 local_list: local •
+
+    $default  reduce using rule 37 (local_list)
+
+
+State 91
+
+   27 function: FUNC base ID LPAR $@6 list_args RPAR LKEY local_decls bloqueSentencias RKEY •
+
+    $default  reduce using rule 27 (function)
+
+
+State 92
+
+   41 sentencias: sentencias sentencia •
+
+    $default  reduce using rule 41 (sentencias)
+
+
+State 93
+
+   88 sentAsig: left_part ASIG • expresion PYC
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    expresion  go to state 121
+
+
+State 94
+
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+   71 array: LCOR expresion • RCOR
+
+    MAS    shift, and go to state 114
+    MENOS  shift, and go to state 115
+    MUL    shift, and go to state 116
+    DIV    shift, and go to state 117
+    MOD    shift, and go to state 118
+    RCOR   shift, and go to state 122
+
+
+State 95
+
+   91 left_part: ID DOT ID •
+
+    $default  reduce using rule 91 (left_part)
+
+
+State 96
+
+   52 sentProc: ID LPAR list_params • RPAR PYC
+
+    RPAR  shift, and go to state 123
+
+
+State 97
+
+   53 list_params: params •
+   55 params: params • COMA param
+
+    COMA  shift, and go to state 124
+
+    $default  reduce using rule 53 (list_params)
+
+
+State 98
+
+   56 params: param •
+
+    $default  reduce using rule 56 (params)
+
+
+State 99
+
+   57 param: expresion •
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+
+    MAS    shift, and go to state 114
+    MENOS  shift, and go to state 115
+    MUL    shift, and go to state 116
+    DIV    shift, and go to state 117
+    MOD    shift, and go to state 118
+
+    $default  reduce using rule 57 (param)
+
+
+State 100
+
+   70 array: array LCOR • expresion RCOR
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    expresion  go to state 125
+
+
+State 101
+
+   80 condicion: NOT • condicion
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    NOT     shift, and go to state 101
+    LPAR    shift, and go to state 102
+
+    expresion  go to state 103
+    condicion  go to state 126
+
+
+State 102
+
+   63 expresion: LPAR • expresion RPAR
+   81 condicion: LPAR • condicion RPAR
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    NOT     shift, and go to state 101
+    LPAR    shift, and go to state 102
+
+    expresion  go to state 127
+    condicion  go to state 128
+
+
+State 103
+
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+   74 condicion: expresion • EQUAL expresion
+   75          | expresion • DISTINCT expresion
+   76          | expresion • GT expresion
+   77          | expresion • LT expresion
+   78          | expresion • GTE expresion
+   79          | expresion • LTE expresion
+
+    EQUAL     shift, and go to state 129
+    DISTINCT  shift, and go to state 130
+    LT        shift, and go to state 131
+    GT        shift, and go to state 132
+    LTE       shift, and go to state 133
+    GTE       shift, and go to state 134
+    MAS       shift, and go to state 114
+    MENOS     shift, and go to state 115
+    MUL       shift, and go to state 116
+    DIV       shift, and go to state 117
+    MOD       shift, and go to state 118
+
+
+State 104
+
+   72 condicion: condicion • OR condicion
+   73          | condicion • AND condicion
+   82 sentIf: IF LPAR condicion • RPAR bloqueOSentencia sentElse
+
+    OR    shift, and go to state 135
+    AND   shift, and go to state 136
+    RPAR  shift, and go to state 137
+
+
+State 105
+
+   72 condicion: condicion • OR condicion
+   73          | condicion • AND condicion
+   87 sentWhile: WHILE LPAR condicion • RPAR bloqueOSentencia
+
+    OR    shift, and go to state 135
+    AND   shift, and go to state 136
+    RPAR  shift, and go to state 138
+
+
+State 106
+
+   93 sentPuts: PRINT LPAR STRING • RPAR PYC
+
+    RPAR  shift, and go to state 139
+
+
+State 107
+
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+   92 sentPutw: PRINT LPAR expresion • RPAR PYC
+
+    MAS    shift, and go to state 114
+    MENOS  shift, and go to state 115
+    MUL    shift, and go to state 116
+    DIV    shift, and go to state 117
+    MOD    shift, and go to state 118
+    RPAR   shift, and go to state 140
+
+
+State 108
+
+   66 complemento: DOT • ID
+
+    ID  shift, and go to state 141
+
+
+State 109
+
+   68 complemento: LPAR • list_params RPAR
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    $default  reduce using rule 54 (list_params)
+
+    list_params  go to state 142
+    params       go to state 97
+    param        go to state 98
+    expresion    go to state 99
+
+
+State 110
+
+   65 expresion: ID complemento •
+
+    $default  reduce using rule 65 (expresion)
+
+
+State 111
+
+   67 complemento: array •
+   70 array: array • LCOR expresion RCOR
+
+    LCOR  shift, and go to state 100
+
+    $default  reduce using rule 67 (complemento)
+
+
+State 112
+
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+   63          | LPAR expresion • RPAR
+
+    MAS    shift, and go to state 114
+    MENOS  shift, and go to state 115
+    MUL    shift, and go to state 116
+    DIV    shift, and go to state 117
+    MOD    shift, and go to state 118
+    RPAR   shift, and go to state 143
+
+
+State 113
+
+   51 sentReturn: RETURN expresion PYC •
+
+    $default  reduce using rule 51 (sentReturn)
+
+
+State 114
+
+   58 expresion: expresion MAS • expresion
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    expresion  go to state 144
+
+
+State 115
+
+   59 expresion: expresion MENOS • expresion
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    expresion  go to state 145
+
+
+State 116
+
+   60 expresion: expresion MUL • expresion
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    expresion  go to state 146
+
+
+State 117
+
+   61 expresion: expresion DIV • expresion
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    expresion  go to state 147
+
+
+State 118
+
+   62 expresion: expresion MOD • expresion
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    expresion  go to state 148
+
+
+State 119
+
+   35 local_decl: base local_list PYC •
+
+    $default  reduce using rule 35 (local_decl)
+
+
+State 120
+
+   36 local_list: local_list COMA • local
+
+    ID  shift, and go to state 88
+
+    local  go to state 149
+
+
+State 121
+
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+   88 sentAsig: left_part ASIG expresion • PYC
+
+    PYC    shift, and go to state 150
+    MAS    shift, and go to state 114
+    MENOS  shift, and go to state 115
+    MUL    shift, and go to state 116
+    DIV    shift, and go to state 117
+    MOD    shift, and go to state 118
+
+
+State 122
+
+   71 array: LCOR expresion RCOR •
+
+    $default  reduce using rule 71 (array)
+
+
+State 123
+
+   52 sentProc: ID LPAR list_params RPAR • PYC
+
+    PYC  shift, and go to state 151
+
+
+State 124
+
+   55 params: params COMA • param
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    param      go to state 152
+    expresion  go to state 99
+
+
+State 125
+
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+   70 array: array LCOR expresion • RCOR
+
+    MAS    shift, and go to state 114
+    MENOS  shift, and go to state 115
+    MUL    shift, and go to state 116
+    DIV    shift, and go to state 117
+    MOD    shift, and go to state 118
+    RCOR   shift, and go to state 153
+
+
+State 126
+
+   72 condicion: condicion • OR condicion
+   73          | condicion • AND condicion
+   80          | NOT condicion •
+
+    $default  reduce using rule 80 (condicion)
+
+
+State 127
+
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+   63          | LPAR expresion • RPAR
+   74 condicion: expresion • EQUAL expresion
+   75          | expresion • DISTINCT expresion
+   76          | expresion • GT expresion
+   77          | expresion • LT expresion
+   78          | expresion • GTE expresion
+   79          | expresion • LTE expresion
+
+    EQUAL     shift, and go to state 129
+    DISTINCT  shift, and go to state 130
+    LT        shift, and go to state 131
+    GT        shift, and go to state 132
+    LTE       shift, and go to state 133
+    GTE       shift, and go to state 134
+    MAS       shift, and go to state 114
+    MENOS     shift, and go to state 115
+    MUL       shift, and go to state 116
+    DIV       shift, and go to state 117
+    MOD       shift, and go to state 118
+    RPAR      shift, and go to state 143
+
+
+State 128
+
+   72 condicion: condicion • OR condicion
+   73          | condicion • AND condicion
+   81          | LPAR condicion • RPAR
+
+    OR    shift, and go to state 135
+    AND   shift, and go to state 136
+    RPAR  shift, and go to state 154
+
+
+State 129
+
+   74 condicion: expresion EQUAL • expresion
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    expresion  go to state 155
+
+
+State 130
+
+   75 condicion: expresion DISTINCT • expresion
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    expresion  go to state 156
+
+
+State 131
+
+   77 condicion: expresion LT • expresion
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    expresion  go to state 157
+
+
+State 132
+
+   76 condicion: expresion GT • expresion
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    expresion  go to state 158
+
+
+State 133
+
+   79 condicion: expresion LTE • expresion
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    expresion  go to state 159
+
+
+State 134
+
+   78 condicion: expresion GTE • expresion
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    LPAR    shift, and go to state 86
+
+    expresion  go to state 160
+
+
+State 135
+
+   72 condicion: condicion OR • condicion
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    NOT     shift, and go to state 101
+    LPAR    shift, and go to state 102
+
+    expresion  go to state 103
+    condicion  go to state 161
+
+
+State 136
+
+   73 condicion: condicion AND • condicion
+
+    ID      shift, and go to state 84
+    NUMERO  shift, and go to state 85
+    NOT     shift, and go to state 101
+    LPAR    shift, and go to state 102
+
+    expresion  go to state 103
+    condicion  go to state 162
+
+
+State 137
+
+   82 sentIf: IF LPAR condicion RPAR • bloqueOSentencia sentElse
+
+    ID      shift, and go to state 56
+    IF      shift, and go to state 57
+    WHILE   shift, and go to state 58
+    PRINT   shift, and go to state 59
+    BREAK   shift, and go to state 60
+    RETURN  shift, and go to state 61
+    LKEY    shift, and go to state 163
+
+    sentencia         go to state 164
+    sentReturn        go to state 67
+    sentProc          go to state 68
+    sentIf            go to state 69
+    bloqueOSentencia  go to state 165
+    sentWhile         go to state 70
+    sentAsig          go to state 71
+    left_part         go to state 72
+    sentPutw          go to state 73
+    sentPuts          go to state 74
+    sentBreak         go to state 75
+
+
+State 138
+
+   87 sentWhile: WHILE LPAR condicion RPAR • bloqueOSentencia
+
+    ID      shift, and go to state 56
+    IF      shift, and go to state 57
+    WHILE   shift, and go to state 58
+    PRINT   shift, and go to state 59
+    BREAK   shift, and go to state 60
+    RETURN  shift, and go to state 61
+    LKEY    shift, and go to state 163
+
+    sentencia         go to state 164
+    sentReturn        go to state 67
+    sentProc          go to state 68
+    sentIf            go to state 69
+    bloqueOSentencia  go to state 166
+    sentWhile         go to state 70
+    sentAsig          go to state 71
+    left_part         go to state 72
+    sentPutw          go to state 73
+    sentPuts          go to state 74
+    sentBreak         go to state 75
+
+
+State 139
+
+   93 sentPuts: PRINT LPAR STRING RPAR • PYC
+
+    PYC  shift, and go to state 167
+
+
+State 140
+
+   92 sentPutw: PRINT LPAR expresion RPAR • PYC
+
+    PYC  shift, and go to state 168
+
+
+State 141
+
+   66 complemento: DOT ID •
+
+    $default  reduce using rule 66 (complemento)
+
+
+State 142
+
+   68 complemento: LPAR list_params • RPAR
+
+    RPAR  shift, and go to state 169
+
+
+State 143
+
+   63 expresion: LPAR expresion RPAR •
+
+    $default  reduce using rule 63 (expresion)
+
+
+State 144
+
+   58 expresion: expresion • MAS expresion
+   58          | expresion MAS expresion •
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+
+    MUL  shift, and go to state 116
+    DIV  shift, and go to state 117
+    MOD  shift, and go to state 118
+
+    $default  reduce using rule 58 (expresion)
+
+
+State 145
+
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   59          | expresion MENOS expresion •
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+
+    MUL  shift, and go to state 116
+    DIV  shift, and go to state 117
+    MOD  shift, and go to state 118
+
+    $default  reduce using rule 59 (expresion)
+
+
+State 146
+
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   60          | expresion MUL expresion •
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+
+    $default  reduce using rule 60 (expresion)
+
+
+State 147
+
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   61          | expresion DIV expresion •
+   62          | expresion • MOD expresion
+
+    $default  reduce using rule 61 (expresion)
+
+
+State 148
+
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+   62          | expresion MOD expresion •
+
+    $default  reduce using rule 62 (expresion)
+
+
+State 149
+
+   36 local_list: local_list COMA local •
+
+    $default  reduce using rule 36 (local_list)
+
+
+State 150
+
+   88 sentAsig: left_part ASIG expresion PYC •
+
+    $default  reduce using rule 88 (sentAsig)
+
+
+State 151
+
+   52 sentProc: ID LPAR list_params RPAR PYC •
+
+    $default  reduce using rule 52 (sentProc)
+
+
+State 152
+
+   55 params: params COMA param •
+
+    $default  reduce using rule 55 (params)
+
+
+State 153
+
+   70 array: array LCOR expresion RCOR •
+
+    $default  reduce using rule 70 (array)
+
+
+State 154
+
+   81 condicion: LPAR condicion RPAR •
+
+    $default  reduce using rule 81 (condicion)
+
+
+State 155
+
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+   74 condicion: expresion EQUAL expresion •
+
+    MAS    shift, and go to state 114
+    MENOS  shift, and go to state 115
+    MUL    shift, and go to state 116
+    DIV    shift, and go to state 117
+    MOD    shift, and go to state 118
+
+    $default  reduce using rule 74 (condicion)
+
+
+State 156
+
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+   75 condicion: expresion DISTINCT expresion •
+
+    MAS    shift, and go to state 114
+    MENOS  shift, and go to state 115
+    MUL    shift, and go to state 116
+    DIV    shift, and go to state 117
+    MOD    shift, and go to state 118
+
+    $default  reduce using rule 75 (condicion)
+
+
+State 157
+
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+   77 condicion: expresion LT expresion •
+
+    MAS    shift, and go to state 114
+    MENOS  shift, and go to state 115
+    MUL    shift, and go to state 116
+    DIV    shift, and go to state 117
+    MOD    shift, and go to state 118
+
+    $default  reduce using rule 77 (condicion)
+
+
+State 158
+
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+   76 condicion: expresion GT expresion •
+
+    MAS    shift, and go to state 114
+    MENOS  shift, and go to state 115
+    MUL    shift, and go to state 116
+    DIV    shift, and go to state 117
+    MOD    shift, and go to state 118
+
+    $default  reduce using rule 76 (condicion)
+
+
+State 159
+
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+   79 condicion: expresion LTE expresion •
+
+    MAS    shift, and go to state 114
+    MENOS  shift, and go to state 115
+    MUL    shift, and go to state 116
+    DIV    shift, and go to state 117
+    MOD    shift, and go to state 118
+
+    $default  reduce using rule 79 (condicion)
+
+
+State 160
+
+   58 expresion: expresion • MAS expresion
+   59          | expresion • MENOS expresion
+   60          | expresion • MUL expresion
+   61          | expresion • DIV expresion
+   62          | expresion • MOD expresion
+   78 condicion: expresion GTE expresion •
+
+    MAS    shift, and go to state 114
+    MENOS  shift, and go to state 115
+    MUL    shift, and go to state 116
+    DIV    shift, and go to state 117
+    MOD    shift, and go to state 118
+
+    $default  reduce using rule 78 (condicion)
+
+
+State 161
+
+   72 condicion: condicion • OR condicion
+   72          | condicion OR condicion •
+   73          | condicion • AND condicion
+
+    AND  shift, and go to state 136
+
+    $default  reduce using rule 72 (condicion)
+
+
+State 162
+
+   72 condicion: condicion • OR condicion
+   73          | condicion • AND condicion
+   73          | condicion AND condicion •
+
+    $default  reduce using rule 73 (condicion)
+
+
+State 163
+
+   85 bloqueOSentencia: LKEY • bloqueSentencias RKEY
+
+    ID      shift, and go to state 56
+    IF      shift, and go to state 57
+    WHILE   shift, and go to state 58
+    PRINT   shift, and go to state 59
+    BREAK   shift, and go to state 60
+    RETURN  shift, and go to state 61
+
+    $default  reduce using rule 40 (bloqueSentencias)
+
+    bloqueSentencias  go to state 170
+    sentencias        go to state 65
+    sentencia         go to state 66
+    sentReturn        go to state 67
+    sentProc          go to state 68
+    sentIf            go to state 69
+    sentWhile         go to state 70
+    sentAsig          go to state 71
+    left_part         go to state 72
+    sentPutw          go to state 73
+    sentPuts          go to state 74
+    sentBreak         go to state 75
+
+
+State 164
+
+   86 bloqueOSentencia: sentencia •
+
+    $default  reduce using rule 86 (bloqueOSentencia)
+
+
+State 165
+
+   82 sentIf: IF LPAR condicion RPAR bloqueOSentencia • sentElse
+
+    ELSE  shift, and go to state 171
+
+    $default  reduce using rule 84 (sentElse)
+
+    sentElse  go to state 172
+
+
+State 166
+
+   87 sentWhile: WHILE LPAR condicion RPAR bloqueOSentencia •
+
+    $default  reduce using rule 87 (sentWhile)
+
+
+State 167
+
+   93 sentPuts: PRINT LPAR STRING RPAR PYC •
+
+    $default  reduce using rule 93 (sentPuts)
+
+
+State 168
+
+   92 sentPutw: PRINT LPAR expresion RPAR PYC •
+
+    $default  reduce using rule 92 (sentPutw)
+
+
+State 169
+
+   68 complemento: LPAR list_params RPAR •
+
+    $default  reduce using rule 68 (complemento)
+
+
+State 170
+
+   85 bloqueOSentencia: LKEY bloqueSentencias • RKEY
+
+    RKEY  shift, and go to state 173
+
+
+State 171
+
+   83 sentElse: ELSE • bloqueOSentencia
+
+    ID      shift, and go to state 56
+    IF      shift, and go to state 57
+    WHILE   shift, and go to state 58
+    PRINT   shift, and go to state 59
+    BREAK   shift, and go to state 60
+    RETURN  shift, and go to state 61
+    LKEY    shift, and go to state 163
+
+    sentencia         go to state 164
+    sentReturn        go to state 67
+    sentProc          go to state 68
+    sentIf            go to state 69
+    bloqueOSentencia  go to state 174
+    sentWhile         go to state 70
+    sentAsig          go to state 71
+    left_part         go to state 72
+    sentPutw          go to state 73
+    sentPuts          go to state 74
+    sentBreak         go to state 75
+
+
+State 172
+
+   82 sentIf: IF LPAR condicion RPAR bloqueOSentencia sentElse •
+
+    $default  reduce using rule 82 (sentIf)
+
+
+State 173
+
+   85 bloqueOSentencia: LKEY bloqueSentencias RKEY •
+
+    $default  reduce using rule 85 (bloqueOSentencia)
+
+
+State 174
+
+   83 sentElse: ELSE bloqueOSentencia •
+
+    $default  reduce using rule 83 (sentElse)
