@@ -31,54 +31,81 @@ cadena \"([\x20-\x21\x23-\xFE])*\"
             yylval = lval;
 %}
 <INITIAL>{
-[0-9]+       {
+[0-9]+      {
                yylval->build< std::string >( yytext );
                return( token::NUMERO );
             }
 
-"if"       {
+"if"        {
                return( token::IF );
-            }            
+            }
 
-
-"else"       {
+"else"      {
                return( token::ELSE );
-            }            
+            }
 
 
-"while"       {
+"while"     {
                return( token::WHILE );
-            }            
+            }
 
 
-"print"       {
+"print"     {
                return( token::PRINT );
-            }            
+            }
 
 "int"       {
                return( token::INT );
-            }    
+            }
 
-"void"       {
+"void"      {
                return( token::VOID );
-            }    
-        
+            }
 
-"break"       {
+"char"      {
+                return( token::CHAR );
+            }
+
+"float"     {
+                return( token::FLOAT );
+            }
+
+"double"    {
+                return( token::DOUBLE );
+            }
+
+
+"break"     {
                return( token::BREAK );
-            }  
+            }
 
-"struct"       {
+"struct"    {
                return( token::STRUCT );
-            } 
+            }
 
-"func"       {
+"for"       {
+                return(token::FOR);
+            }
+
+"switch"    {
+                return(token::SWITCH);
+            }
+
+"case"      {
+                return(token::CASE);
+            }
+
+"default"   {
+                return(token::DEFAULT);
+            }
+
+"func"      {
                return( token::FUNC );
-            } 
+            }
 
-"return"       {
+"return"    {
                return( token::RETURN );
-            }                      
+            }
 
 [a-zA-Z][a-zA-Z0-9_]*   {
                yylval->build< std::string >( yytext );
@@ -99,23 +126,23 @@ cadena \"([\x20-\x21\x23-\xFE])*\"
 
 "{"       {
                return( token::LKEY );
-            }            
+            }
 
 "}"       {
                return( token::RKEY );
-            }  
+            }
 
 "["       {
                return( token::LCOR );
-            }            
+            }
 
 "]"       {
                return( token::RCOR );
-            } 
+            }
 
 ";"       {
                return( token::PYC );
-            }            
+            }
 
 ","       {
                return( token::COMA );
@@ -171,15 +198,23 @@ cadena \"([\x20-\x21\x23-\xFE])*\"
 
 "||"       {
                return( token::OR );
-            }                   
+            }
 
 "&&"        {
                return( token::AND );
-            }       
+            }
 
-"!"        {
+"!"         {
                return( token::NOT );
-            }   
+            }
+
+"."         {
+                return(token::DOT);
+            }
+
+":"         {
+                return(token::TWOP);
+            }
 
 "/*"    {
             coment=true;
@@ -189,7 +224,7 @@ cadena \"([\x20-\x21\x23-\xFE])*\"
 
 \n          {
                /** Update line number **/
-               loc->lines();               
+               loc->lines();
             }
 
 [ \t\r]     {}

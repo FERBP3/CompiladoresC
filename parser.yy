@@ -46,9 +46,9 @@ using namespace std;
 %token <std::string>    ID
 %token <std::string>    NUMERO
 %token <std::string>    STRING
-%token                  IF WHILE PRINT BREAK FUNC
-%token                  INT VOID RETURN STRUCT
-%token                  LKEY RKEY PYC COMA
+%token                  IF WHILE SWITCH CASE DEFAULT FOR PRINT BREAK FUNC
+%token                  INT VOID CHAR FLOAT DOUBLE RETURN STRUCT
+%token                  LKEY RKEY PYC TWOP COMA
 
 %left                   ASIG /*=*/
 %left                   OR /*||*/
@@ -58,7 +58,7 @@ using namespace std;
 %left                   MAS MENOS /* + -*/
 %left                   MUL DIV MOD/* * / */
 %left                   LCOR RCOR
-%left                   NOT 
+%left                   NOT
 %left                   DOT
 %nonassoc               LPAR RPAR /* ( ) */
 %nonassoc               IFX
@@ -66,91 +66,98 @@ using namespace std;
 
 %locations
 %start program
-%type<int> type base arreglo
+%type<int> type base array
 //TODO (79) definir el no terminal list_args y args como vector<int>*
 //TODO (89) definir el no terminal list_param y params como vector<int>*
 //TODO(95) definir el no terminarl param como int
 %%
-program 
+program
     :
     {
         driver.init();
     }
-    declarations    
-    functions      
+    declarations
+    /* functions */
     ;
 
 declarations
-    : 
+    :
     declarations declaration
-    | 
+    |
     %empty
     ;
 
 declaration
-    : 
-    decl_var
-    | 
-    decl_struct        
+    :
+    type decl_fun_var
+    |
+    decl_struct
     ;
-    
-decl_var
-    : 
-    type  
+
+decl_fun_var
+    :
+    list_var PYC
     {
         /* driver.type = $1; */
-        driver.current_type = $1;
+        /* driver.current_type = $1; */
         /* driver.setType() */
-    }  
-    list_var PYC
+    }
+    decl_fun
     ;
 
 list_var
-    : 
+    :
     list_var COMA var
-    | 
+    |
     var
     ;
 
 var
     :
-    ID 
+    ID
     {
         driver.variable($1);
     }
     ;
 
 type
-    : 
+    :
     base  /* $1 */
     { /*$2*/
         /* driver.basico = $1; */
     }
-    arreglo /*$3*/
+    comp_arreglo /*$3*/
     { /* $4 */
-        $$ =  $3;
+        /* $$ =  $3; */
     }
+    |
+    STRUCT ID
     ;
 
 base
-    : 
-    INT 
-    {
-        $$ = 1;
-    }
-    | 
+    :
     VOID
     {
-        $$= 0;
+        /* $$= 0; */
     }
+    |
+    INT
+    {
+        /* $$ = 1; */
+    }
+    CHAR
+    |
+    FLOAT
+    |
+    DOUBLE
     ;
 
-arreglo
-    : LCOR NUMERO RCOR  arreglo
+comp_arreglo
+    : LCOR NUMERO RCOR comp_arreglo
     {
         // TODO(64) Agregar las acciones semánticas para ingresar un tipo array
-    } 
-    | 
+    }
+    |
     %empty
     {
         // TODO(65) Agregar las acciones semánticas para convertir gBase en el tipo de arreglo
@@ -159,7 +166,7 @@ arreglo
     ;
 
 decl_struct
-    : 
+    :
     STRUCT LKEY{
         // TODO(66) Agregar las acciones semánticas para push en tstack
     } body_struct RKEY
@@ -168,38 +175,23 @@ decl_struct
         // TODO(68) Agregar un tipo nuevo a la tabla de tipos de tipo struct
         // TODO(71) Hacer gType igual a lo que regres la tabla de tipos al insertar el struct
     } list_var PYC
+    |
+    STRUCT ID LKEY body_struct RKEY list_var PYC
     ;
 
 body_struct
-    : 
-    body_struct def_mem
-    | 
-    def_mem
-    ;
-
-def_mem
-    : 
-    base ID PYC{
-        // TODO(72) Comprobar que el id no se ha declarado
-        // TODO(73) En caso de que no exista agregarlo a la tabla de símbolos
-    }
-    ;
-
-functions
     :
-    functions function
-    | 
-    function
+    body_struct decl_local
+    |
+    decl_local
     ;
 
-function
-    : 
-    FUNC base ID LPAR
+decl_fun
+    :
+    ID LPAR list_params RPAR LKEY decl_locales bloqueSentencias RKEY
     {
-        // TODO(74) Hacer un push a tstack    
-    }
-    list_args RPAR LKEY local_decls bloqueSentencias RKEY
-    {
+        // TODO(74) Donde hacer un push a tskack **
+
         // TODO(75) Hacer pop a tskack
         // TODO(76) Validar que el id no está en la tabla de símbolos
         // TODO](77) En caso de no estar agregarlo
@@ -208,8 +200,111 @@ function
     }
     ;
 
+list_params
+    :
+    params
+    |
+    %empty
+    ;
+
+params
+    :
+    params COMA param
+    |
+    param
+    ;
+
+param
+    :
+    type_param ID
+    ;
+
+type_param
+    :
+    base parte_array
+    |
+    STRUCT ID
+    ;
+
+parte_array
+    :
+    parte_array LCOR NUMERO RCOR
+    |
+    LCOR RCOR
+    |
+    %empty
+    ;
+
+decl_locales
+    :
+    decl_locales decl_local
+    |
+    %empty
+
+decl_local
+    :
+    decl_var
+    |
+    decl_struct
+    ;
+
+decl_var
+    :
+    type list_var PYC
+
+bloqueSentencias
+    : 
+    sentencias
+    | 
+    %empty
+    ;
+
+sentencias
+    :
+    sentencias sentencia
+    |
+    sentencia
+    ;
+
+sentencia
+    :
+    sentIf
+    |
+    sentWhile
+    |
+    sentAsig
+    |
+    sentPutw
+    |
+    sentPuts
+    |
+    sentBreak
+    |
+    sentProc
+    |
+    sentReturn
+    |
+    sentFor
+    |
+    sentSwitch
+    ;
+
+
+sentReturn
+    :
+    RETURN expresion PYC
+    |
+    RETURN PYC
+    ;
+
+sentProc
+    :
+    ID LPAR list_args RPAR PYC
+    ;
+
 list_args
-    : args
+    :
+    args
     {
         // TOTOD(80) Hacer que list_args.lista =  args.lista
     }
@@ -221,13 +316,13 @@ list_args
     ;
 
 args
-    : 
+    :
     args COMA arg
     {
         // TODO(82) Agregar arg.type a args1.lista
         // TODO(83) Hacer args.lista = args1.lista
     }
-    | 
+    |
     arg
     {
         // TODO(84) Agregar arg.type a args.lista
@@ -235,218 +330,141 @@ args
     ;
 
 arg
-    : 
-    base ID {
+    :
+    expresion {
         // TODO(85) validar que el id no se ha declarado
         // TODO(85) Hacer arg.type = base.type
     }
     ;
 
-local_decls
-    : 
-    local_decls local_decl
-    | 
-    %empty
-    ;
-
-local_decl
-    : 
-    base local_list PYC    
-    ;
-
-local_list
-    : 
-    local_list  COMA local
-    { 
-        //TODO(87) Similar a list_var
-    }
-    | 
-    local
-    ;
-
-local
-    : 
-    ID
-    {
-        //TODO(88) Similar a var
-    }
-    ;
-
-bloqueSentencias
-    : 
-    sentencias
-    | 
-    %empty
-    ;
-
-sentencias
-    :
-    sentencias sentencia     
-    | 
-    sentencia
-    ;
-
-sentencia
-    : 
-    sentIf
-    | 
-    sentWhile
-    | 
-    sentAsig
-    | 
-    sentPutw
-    | 
-    sentPuts
-    | 
-    sentBreak
-    | 
-    sentProc
-    | 
-    sentReturn
-    ;
-
-sentReturn
-    : RETURN expresion PYC
-    ;
-
-sentProc
-    : 
-    ID LPAR list_params RPAR PYC
-    ;
-
-list_params
-    : 
-    params{
-        // TODO(90) Similar a list_args-> args
-    }
-    | 
-    %empty{
-        // TODO(91) Similar a list_args-> epsilon
-    }
-    ;
-
-params
-    : 
-    params COMA param
-    {
-        // TODO(92) Similar a args-> args, arg
-    }
-    | 
-    param
-    {
-        // TODO(93) Similar a args-> arg
-    }
-    ;
-
-param
-    : expresion
-    {
-        // TODO(94) param.type = expresion.type
-    }
-    ;
-
 expresion
-    : 
+    :
     expresion MAS expresion 
-    | 
+    |
     expresion MENOS expresion
-    | 
+    |
     expresion MUL expresion
-    | 
+    |
     expresion DIV expresion
-    | 
+    |
     expresion MOD expresion
-    | 
+    |
     LPAR expresion RPAR
-    | 
+    |
     NUMERO
-    |  
+    |
     ID complemento
     ;
 
 complemento
-    : 
-    DOT ID
+    :
+    comp_struct
     |
     array
     |
-    LPAR list_params RPAR
+    LPAR list_params RPAR PYC
     |
     %empty
     ;
 
 array
-    : 
-    array LCOR expresion RCOR 
-    | 
-    LCOR expresion RCOR 
+    :
+    array LCOR expresion RCOR
+    |
+    LCOR expresion RCOR
     ;
+
 /* S-> S...S | ... | S...S| otro */
-condicion     
-    : 
+condicion
+    :
     condicion OR condicion
-    | 
+    |
     condicion AND condicion
-    | 
+    |
     expresion EQUAL expresion
-    | 
+    |
     expresion DISTINCT expresion
-    | 
+    |
     expresion GT expresion
-    | 
+    |
     expresion LT expresion
-    | 
+    |
     expresion GTE expresion
-    | 
+    |
     expresion LTE expresion
-    | 
+    |
     NOT condicion
-    | 
+    |
     LPAR condicion RPAR
     ;
 
 sentIf
     : IF LPAR
-    condicion    
+    condicion
     RPAR bloqueOSentencia
-    sentElse    
+    sentElse
     ;
 
 sentElse
-    : 
+    :
     ELSE bloqueOSentencia
-    | 
+    |
     %empty %prec IFX
     ;
 
-bloqueOSentencia
-    : 
-    LKEY bloqueSentencias RKEY
-    | 
-    sentencia
-    ;
-
 sentWhile
-    : 
+    :
     WHILE LPAR
     condicion
-    RPAR 
-    bloqueOSentencia    
+    RPAR
+    bloqueOSentencia
+    ;
+
+sentSwitch
+    :
+    WHILE LPAR condicion RPAR LKEY body_switch RKEY
+    ;
+
+body_switch
+    :
+    caso body_switch
+    |
+    predeterminado
+    |
+    %empty
+
+caso
+    :
+    CASE expresion PYC sentencias
+    ;
+
+predeterminado
+    :
+    DEFAULT TWOP sentencias
+    ;
+
+sentFor
+    :
+    FOR LPAR sentAsig PYC condicion PYC expresion RPAR bloqueOSentencia
     ;
 
 sentAsig
-    : 
+    :
     left_part ASIG expresion PYC
     ;
 
 left_part
-    : 
-    ID
-    | 
+    :
+    ID comp_struct
+    |
     ID array
-    | 
-    ID DOT ID
     ;
+
+comp_struct
+    :
+    comp_struct DOT ID
+    |
+    %empty
 
 sentPutw
     :
@@ -455,15 +473,23 @@ sentPutw
     ;
 
 sentPuts
-    : 
+    :
     PRINT LPAR STRING
     RPAR PYC
     ;
 
 sentBreak
-    : BREAK    
+    : BREAK
     PYC
     ;
+
+bloqueOSentencia
+    :
+    LKEY bloqueSentencias RKEY
+    |
+    sentencia
+    ;
+
 
 %%
 
