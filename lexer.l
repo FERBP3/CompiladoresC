@@ -3,7 +3,6 @@
 #include <iostream>
 using namespace std;
 bool coment = false;
-
 #include "Scanner.hpp"
 #undef  YY_DECL
 #define YY_DECL int C0::Scanner::yylex( C0::Parser::semantic_type * const lval, C0::Parser::location_type *location )
@@ -73,7 +72,6 @@ cadena \"([\x20-\x21\x23-\xFE])*\"
 "double"    {
                 return( token::DOUBLE );
             }
-
 
 "break"     {
                return( token::BREAK );

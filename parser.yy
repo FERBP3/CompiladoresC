@@ -3,7 +3,7 @@
 %debug 
 %defines 
 %define api.namespace {C0}
-%define parser_class_name {Parser}
+%define api.parser.class {Parser}
 
 %code requires{
 
@@ -66,10 +66,10 @@ using namespace std;
 
 %locations
 %start program
-%type<int> type base array
+%type<int> base
 //TODO (79) definir el no terminal list_args y args como vector<int>*
 //TODO (89) definir el no terminal list_param y params como vector<int>*
-//TODO(95) definir el no terminarl param como int
+//TODO(95) definir el no terminal param como int
 %%
 program
     :
@@ -77,19 +77,27 @@ program
         driver.init();
     }
     declarations
-    /* functions */
+    {/* printf("programa:\n"); */}
     ;
 
 declarations
     :
     declarations declaration
+    {/* printf("declarations\n"); */}
     |
     %empty
     ;
 
 declaration
     :
-    type decl_fun_var
+    type
+    {
+    //printf("type\n");
+    }
+    decl_fun_var
+    {
+    //printf("decl_fun_var\n");
+    }
     |
     decl_struct
     ;
@@ -101,13 +109,26 @@ decl_fun_var
         /* driver.type = $1; */
         /* driver.current_type = $1; */
         /* driver.setType() */
+        /* printf("list_var PYC\n"); */
     }
+    |
     decl_fun
     ;
 
 list_var
     :
-    list_var COMA var
+    list_var
+    { 
+    // printf("list_var \n");
+    }
+    COMA
+    {
+    // printf("COMA \n");
+    }
+    var
+    {
+     //printf("var \n");
+    }
     |
     var
     ;
@@ -116,7 +137,8 @@ var
     :
     ID
     {
-        driver.variable($1);
+        /* driver.variable($1); */
+        //printf("ID: %s\n", $1.c_str());
     }
     ;
 
@@ -125,10 +147,11 @@ type
     base  /* $1 */
     { /*$2*/
         /* driver.basico = $1; */
+     //printf("base\n");
     }
     comp_arreglo /*$3*/
     { /* $4 */
-        /* $$ =  $3; */
+       /* $$ =  $3; */
     }
     |
     STRUCT ID
@@ -139,12 +162,15 @@ base
     VOID
     {
         /* $$= 0; */
+        //printf("VOID\n");
     }
     |
     INT
     {
+        //printf("aqui hay un INT\n");
         /* $$ = 1; */
     }
+    |
     CHAR
     |
     FLOAT
@@ -156,13 +182,13 @@ comp_arreglo
     : LCOR NUMERO RCOR comp_arreglo
     {
         // TODO(64) Agregar las acciones semánticas para ingresar un tipo array
+        //printf("comp_arreglo %s\n", $2.c_str());
     }
     |
     %empty
     {
         // TODO(65) Agregar las acciones semánticas para convertir gBase en el tipo de arreglo
     }
-
     ;
 
 decl_struct
@@ -188,7 +214,27 @@ body_struct
 
 decl_fun
     :
-    ID LPAR list_params RPAR LKEY decl_locales bloqueSentencias RKEY
+    ID
+    {
+    //printf("ID FUNC: %s\n", $1.c_str());
+    }
+
+    LPAR list_params
+    {
+    //printf("finish list_params\n");
+    }
+
+    RPAR LKEY decl_locales
+    {
+    //printf("finish decl_locales\n");
+    }
+
+    bloqueSentencias
+    {
+    //printf("finish bloqueSentencias");
+    }
+
+    RKEY
     {
         // TODO(74) Donde hacer un push a tskack **
 
@@ -197,6 +243,7 @@ decl_fun
         // TODO](77) En caso de no estar agregarlo
         // TODO(78) Agregar que es tipo func, su tipo de retorno, y su lista de paramétros
         // Almacenada en list_args
+        //printf("finish FUNC: %s\n", $1.c_str());
     }
     ;
 
@@ -217,6 +264,9 @@ params
 param
     :
     type_param ID
+    {
+    //printf("finish type_param id\n");
+    }
     ;
 
 type_param
@@ -229,8 +279,14 @@ type_param
 parte_array
     :
     parte_array LCOR NUMERO RCOR
+    {
+    //printf("corchetes y numero\n");
+    }
     |
     LCOR RCOR
+    {
+    //printf("corchetes\n");
+    }
     |
     %empty
     ;
@@ -240,6 +296,10 @@ decl_locales
     decl_locales decl_local
     |
     %empty
+    {
+    //printf("finish decl_locales empty\n");
+    }
+    ;
 
 decl_local
     :
@@ -253,9 +313,9 @@ decl_var
     type list_var PYC
 
 bloqueSentencias
-    : 
+    :
     sentencias
-    | 
+    |
     %empty
     ;
 
@@ -268,6 +328,8 @@ sentencias
 
 sentencia
     :
+    sentProc
+    |
     sentIf
     |
     sentWhile
@@ -279,8 +341,6 @@ sentencia
     sentPuts
     |
     sentBreak
-    |
-    sentProc
     |
     sentReturn
     |
@@ -352,8 +412,18 @@ expresion
     LPAR expresion RPAR
     |
     NUMERO
+    {
+    //printf("finish numero expresion %s\n", $1.c_str());
+    }
     |
-    ID complemento
+    ID
+    {
+    //printf("finish id expresion %s\n", $1.c_str());
+    }
+    complemento
+    {
+    //printf("finish complemento expresion\n");
+    }
     ;
 
 complemento
@@ -362,7 +432,11 @@ complemento
     |
     array
     |
-    LPAR list_params RPAR PYC
+    LPAR
+    list_args
+    RPAR
+    {//printf("finish list_params complemento\n");
+    }
     |
     %empty
     ;
@@ -370,8 +444,14 @@ complemento
 array
     :
     array LCOR expresion RCOR
+    {
+    //printf("array \n");
+    }
     |
     LCOR expresion RCOR
+    {
+    //printf("array \n");
+    }
     ;
 
 /* S-> S...S | ... | S...S| otro */
@@ -422,7 +502,21 @@ sentWhile
 
 sentSwitch
     :
-    WHILE LPAR condicion RPAR LKEY body_switch RKEY
+    SWITCH
+    {
+    //printf("switch token \n");
+    }
+
+    LPAR expresion
+    {
+    //printf("switch expresion \n");
+    }
+
+    RPAR LKEY body_switch
+    RKEY
+    {
+    //printf("switch body \n");
+    }
     ;
 
 body_switch
@@ -432,10 +526,11 @@ body_switch
     predeterminado
     |
     %empty
+    ;
 
 caso
     :
-    CASE expresion PYC sentencias
+    CASE expresion TWOP sentencias
     ;
 
 predeterminado
@@ -445,13 +540,49 @@ predeterminado
 
 sentFor
     :
-    FOR LPAR sentAsig PYC condicion PYC expresion RPAR bloqueOSentencia
+    FOR
+    {
+    //printf("finish for token\n");
+    }
+    LPAR sentAsig
+    {
+    //printf("finish sentAsig\n");
+    }
+
+    {
+    //printf("finish pyc for\n");
+    }
+
+    condicion
+    {
+    //printf("finish condicion\n");
+    }
+
+    PYC expresion
+    {
+    //printf("finish expresion \n");
+    }
+
+    RPAR
+    {
+    //printf("finish ) for \n");
+    }
+
+    bloqueOSentencia
+    {
+    //printf("finish bloqueOSentencia\n");
+    }
     ;
 
 sentAsig
     :
-    left_part ASIG expresion PYC
+    left_part
+    {
+    //printf("finish left part\n");
+    }
+    ASIG expresion PYC
     ;
+
 
 left_part
     :
@@ -465,6 +596,7 @@ comp_struct
     comp_struct DOT ID
     |
     %empty
+    ;
 
 sentPutw
     :
@@ -479,8 +611,7 @@ sentPuts
     ;
 
 sentBreak
-    : BREAK
-    PYC
+    : BREAK PYC
     ;
 
 bloqueOSentencia

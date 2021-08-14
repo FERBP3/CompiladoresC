@@ -11,7 +11,7 @@ int main(const int argc, const char **argv)
     {
         C0::Driver driver;
         //driver.parse(argv[1]);
-        driver.parse("prueba");
+        driver.parse("prueba2");
     }
     /*else
     {

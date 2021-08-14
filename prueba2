@@ -1,0 +1,52 @@
+int x, y;
+
+struct {
+    int owo;
+    float owo2;
+    double owo3;
+    char owo3;
+}m, h;
+
+int[2][2] arreglo;
+
+
+void main(int x, int y){
+    int a, b;
+    b = suma(w, y);
+
+    if (a == 2){
+        a = 2;
+    } else if (b == 4){
+        a = 4;
+    } else {
+        owo = 8000;
+    }
+
+    for (i = 0; i < 8; 1 + 1){
+        owo = 4;
+    }
+
+    switch(b){
+        case 6:
+            i = i + 1;
+        case 8:
+            owo = owo % owo;
+        default:
+            owo = owo / 1;
+    }
+
+    while (owo != 8){
+        owo = owo - 3;
+    }
+
+}
+
+int suma(int a, int[] b){
+    return a+b;
+}
+
+int resta(int owo2, float owo3){
+    return;
+}
+
+
