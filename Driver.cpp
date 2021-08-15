@@ -87,8 +87,8 @@ string C0::Driver::newTemp() {
 
 bool C0::Driver::isInSymbol(string id) {
     // TODO(43) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    return tstack.top().isInSymbol(id);
     //return table->isInSymbol(id);
+    return tstack.top().isInSymbol(id);
 }
 
 void C0::Driver::addSymbol(string id) {
@@ -349,11 +349,34 @@ void C0::Driver::addQuad(Quad q) {
 }
 
 // TODO(54) Programar la funcion miembro que envuelve a getName de la tabla de tipos
+string C0::Driver::getName(int id){
+    return tstack.top().getName(id);
+}
+
 // TODO(55) Programar la funcion miembro que envuelve a getTam de la tabla de tipos
+int C0::Driver::getTam(int id){
+    return tstack.top().getTam(id);
+}
+
 // TODO(56) Programar la funcion miembro que envuelve a getTipoBase de la tabla de tipos
+int C0::Driver::getTipoBase(int id){
+    return tstack.top().getTipoBase(id);
+}
+
 // TODO(57) Programar la funcion miembro que envuelve a getNumImtes de la tabla de tipos
+int C0::Driver::getNumItems(int id){
+    return tstack.top().getNumItems(id);
+}
+
 // TODO(58) Programar la funcion miembro que envuelve a getBase de la tabla de tipos
+C0::Table* C0::Driver::getBase(int id){
+    return tstack.top().getBase(id);
+}
+
 // TODO(59) Programar la funcion miembro que envuelve a setBase de la tabla de tipos   
+void C0::Driver::setBase(int id, Table *base){
+    tstack.top().setBase(id, base);
+}
 
 void C0::Driver::variable(string id){
     if(isInSymbol(id))
@@ -369,6 +392,15 @@ void C0::Driver::variable(string id){
 
 
 //TODO(65) Programar la función miembro que envuelva un push a tstack
+void C0::Driver::pushTstack(){
+    tstack.push();
+}
+
 //TODO(66) Programar la función miembro que retorne un Table* al hacer pop a tstack
+C0::Table C0::Driver::popTstack(){
+    C0::Table t = tstack.pop();
+    return t;
+}
+
 //TODO(70) Programar la función miembro que añade el tipo struct a la tabla de tipos
 // Como consejo usar la función miembro de Table setBase(Table *t)

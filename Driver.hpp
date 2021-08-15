@@ -28,7 +28,9 @@ public:
 
    void init();
    //TODO(63) Definir el prototipo de una función que envuelva un push a tstack
+   void pushTstack();
    //TODO(64) Definir el prototpio de una función que retorne un Table* al hacer pop a tstack
+   Table popTstack();
    /*************************************************************************/
    /*     FUNCIONES QUE ENVUELVEN EL FUNCIONAMIENTO DE LA TABLA DE SÍMBOLOS */
    /*************************************************************************/
@@ -44,12 +46,19 @@ public:
    /*     FUNCIONES QUE ENVUELVEN EL FUNCIONAMIENTO DE LA TABLA DE TIPOS */
    /*************************************************************************/
    // TODO(32) Agregar el prototipo para la funcion que envuelve a getName de la tabla de tipos
+   string getName(int id);
    // TODO(33) Agregar el prototipo para la funcion que envuelve a getTam de la tabla de tipos
+   int getTam(int id);
    // TODO(34) Agregar el prototipo para la funcion que envuelve a getTipoBase de la tabla de tipos
+   int getTipoBase(int id);
    // TODO(35) Agregar el prototipo para la funcion que envuelve a getNumImtes de la tabla de tipos
+   int getNumItems(int id);
    // TODO(36) Agregar el prototipo para la funcion que envuelve a getBase de la tabla de tipos
+   Table* getBase(int id);
    // TODO(37) Agregar el prototipo para la funcion que envuelve a setBase de la tabla de tipos
+   void setBase(int id, Table *base);
    // TODO(69)  Agregar el prototipo para una función que agregue un tipo nuevo struct recibe: "struct", Table *t
+   //void addTypeStruct(string name, Table *t);
 
    /****************************************************/
    /*     FUNCIONES QUE REALIZAN EL ANÁLISIS SEMÁNTICO */
@@ -92,8 +101,7 @@ public:
 
    
 private:
-   // TODO(28) Borrar la definición de Table
-   //C0::Table *table = nullptr;   
+   // TODO(28) Borrar la definición de Table C0::Table *table = nullptr;   
    // TODO(29) Añadir un nuevo miembro llamado tstack de tipo Stack
    C0::Stack tstack;
    void parse_helper( std::istream &stream );

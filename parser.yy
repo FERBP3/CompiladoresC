@@ -9,6 +9,7 @@
 
 // TODO(60) Incluir a Numero.h
 // TODO(61) Incluir a Expresion.h
+#include "Expresion.h"
 namespace C0 {
     class Driver;
     class Scanner;      
@@ -35,6 +36,7 @@ using namespace std;
 
 #include "Driver.hpp"
 // TODO(62) Definir una variable externa numType: int
+extern int numType;
 
 #undef yylex
 #define yylex scanner.yylex
@@ -66,10 +68,15 @@ using namespace std;
 
 %locations
 %start program
-%type<int> base
+%type<int> type arreglo base type_args parte_array
 //TODO (79) definir el no terminal list_args y args como vector<int>*
+%type<vector<int>*> list_args args
 //TODO (89) definir el no terminal list_param y params como vector<int>*
+%type<vector<int>*> list_params params
 //TODO(95) definir el no terminal param como int
+%type<int> arg param
+%type<Expresion> expresion condicion
+
 %%
 program
     :
