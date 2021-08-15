@@ -4,7 +4,7 @@
 using namespace std;
 
 class PilaCount{
-    private:        
+    private:
         stack<int> pila;
 
     public:
@@ -12,7 +12,7 @@ class PilaCount{
         ~PilaCount();
         void push(int n);
         int pop();
-        int top();        
+        int top();
 };
 
 #endif

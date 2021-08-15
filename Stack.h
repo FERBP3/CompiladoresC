@@ -1,6 +1,6 @@
 // TODO(1) Cambiar la constante PILA_H por TSTACK_H
-#ifndef PILA_H
-#define PILA_H
+#ifndef TSTACK_H
+#define TSTACK_H
 #include <stack>
 #include "Table.h"
 using namespace std;

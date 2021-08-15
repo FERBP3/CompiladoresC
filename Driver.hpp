@@ -10,9 +10,9 @@ using namespace std;
 #include "Scanner.hpp"
 #include "parser.tab.hh"
 // TODO(26) Quitar Table.h
-#include "Table.h"
+//#include "Table.h"
 // TODO(27) Incluir Stack.h
-//#include "Stack.h"
+#include "Stack.h"
 #include "Expresion.h"
 #include "Quad.h"
 #include "PilaCount.h"
@@ -21,7 +21,7 @@ namespace C0{
 class Driver{
 public:
    Driver() = default;
-   virtual ~Driver();   
+   virtual ~Driver();
    void parse( const string& filename );
    string file;
    bool trace_parsing;
@@ -93,8 +93,9 @@ public:
    
 private:
    // TODO(28) Borrar la definición de Table
-   C0::Table *table = nullptr;   
+   //C0::Table *table = nullptr;   
    // TODO(29) Añadir un nuevo miembro llamado tstack de tipo Stack
+   C0::Stack tstack;
    void parse_helper( std::istream &stream );
    C0::Parser  *parser  = nullptr;
    C0::Scanner *scanner = nullptr;
@@ -102,9 +103,9 @@ private:
    string filename;
 
 public:
-   PilaCount *iStack;   
-   PilaCount *wStack;   
-   int numTemp; 
+   PilaCount *iStack;
+   PilaCount *wStack;
+   int numTemp;
    int numIf;
    int numString;
    int numWhile;
@@ -116,8 +117,9 @@ public:
    // TODO(30) Agregar una variable entera llamada gType
    int gType;
    // TODO(31) Agregar una variable entera llamada gBase
+   int gBase;
    // TODO(38) Crear una variable miembro llamada dirStack de tipo apuntador a PilaCount
-   
+   PilaCount* dirStack;
 };
 }
 

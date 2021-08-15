@@ -12,8 +12,8 @@ C0::Driver::~Driver() {
     scanner = nullptr;
     delete (parser);
     parser = nullptr;
-    delete (table);
-    table = nullptr;
+    //delete (table);
+    //table = nullptr;
 }
 
 void C0::Driver::parse(const string& filename) {
@@ -53,8 +53,9 @@ void C0::Driver::parse_helper(std::istream &stream) {
 
 void C0::Driver::init() {
     // TODO(39) Borrar la línea 56
-    table = new Table();
+    //table = new Table();
     // TODO(40) Crear el apuntador a stack de tipo Stack 
+    tstack = Stack();
     gDir = 0;
     iStack = new PilaCount();
     wStack = new PilaCount();
@@ -64,8 +65,10 @@ void C0::Driver::init() {
     numTemp = 0;
     numString = 0;
     // TODO(42) Asignar un valor inicial de cero a gType
+    gType = 0;
     // TODO(43) Asignar un valor inicial de cero a gBase
-    int pos=  filename.find(".");
+    gBase = 0;
+    int pos = filename.find(".");
     output = filename.substr(0,pos-1)+".ens";
 }
 
@@ -84,37 +87,45 @@ string C0::Driver::newTemp() {
 
 bool C0::Driver::isInSymbol(string id) {
     // TODO(43) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    return table->isInSymbol(id);
+    return tstack.top().isInSymbol(id);
+    //return table->isInSymbol(id);
 }
 
 void C0::Driver::addSymbol(string id) {
     // TODO(44) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    table->addSymbol(id);
+    //table->addSymbol(id);
+    tstack.top().addSymbol(id);
 }
 
 void C0::Driver::setDir(string id, int dir) {
     // TODO(45) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    table->setDir(id, dir);
+    //table->setDir(id, dir);
+    tstack.top().setDir(id, dir);
+
 }
 
 void C0::Driver::setType(string id, int type) {
     // TODO(46) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    table->setType(id, type);
+    //table->setType(id, type);
+    tstack.top().setType(id, type);
 }
 
 int C0::Driver::getType(string id) {
     // TODO(47) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    return table->getType(id);
+    //return table->getType(id);
+    return tstack.top().getType(id);
 }
 
 void C0::Driver::setVar(string id, string var) {
     // TODO(48) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    table->setTypeVar(id, var);
+    //table->setTypeVar(id, var);
+    tstack.top().setTypeVar(id, var);
 }
 
 string C0::Driver::getVar(string id) {
     // TODO(49) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    return table->getTypeVar(id);
+    //return table->getTypeVar(id);
+    return tstack.top().getTypeVar(id);
 }
 
 C0::Expresion C0::Driver::add(Expresion e1, Expresion e2) {
@@ -164,9 +175,14 @@ C0::Expresion C0::Driver::number(string num) {
 
 C0::Expresion C0::Driver::ident(string id) {
     // TODO(51) Buscar el id en la tabla de la cima de la pila
+    int type = tstack.top().getType(id);
+
     // TODO(52) En caso de que el id no exista en la tabla de la cima buscar en la tabla global
+    if (type == -1){
+        type = tstack.getGlobal().getType(id);
+    }
     // TODO(53) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    int type = table->getType(id);
+    //int type = table->getType(id);
     Expresion e2(id, type);
     return e2;
 }
@@ -234,13 +250,13 @@ C0::Expresion C0::Driver::distinct(Expresion e1, Expresion e2) {
 void C0::Driver::asign(string id, Expresion e2) {
     C0::Expresion e3;
     // TODO(50) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    int type = table->getType(id);
+    //int type = table->getType(id);
     //int dir = table->getDir(id);
+    int type = tstack.top().getType(id);
+    //int dir = tstack.top().getDir(id);
     if (type == e2.getType()) {
         addQuad(Quad("=", e2.getDir(), "", id));
-
     }
-
 }
 
 /*
@@ -294,9 +310,11 @@ void C0::Driver::printCI() {
 
 void C0::Driver::printSymTab() {
     cout << "Tabla de símbolos" << endl;
+    /*
     for (Symbol s : table->getSymTab()) {
         cout << s.getId() << "\t" << s.getDir() << "\t" << s.getType() << "\t" << s.getTypeVar() << endl;
     }
+    */
 }
 
 void C0::Driver::writew(Expresion e) {

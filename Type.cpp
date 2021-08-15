@@ -1,4 +1,5 @@
 #include "Type.h"
+#include "Table.h"
 
 C0::Type::Type(){
 
@@ -28,7 +29,7 @@ int C0::Type::getNumItems(){
 }
 
 int C0::Type::getTamBytes(){
-    return 1;
+    return tamBytes;
 }
 
 string C0::Type::getName(){
@@ -36,4 +37,12 @@ string C0::Type::getName(){
 }
 
 // TODO(4) Programar  la función  setBase que recibe a base:*Table
+void C0::Type::setBase(C0::Table* base){
+    this->base = base;
+}
+
 // TODO(5) Programar la función getBase que retorna a base
+C0::Table* C0::Type::getBase(){
+    return base;
+}
+
