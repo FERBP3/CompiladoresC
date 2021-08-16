@@ -16,8 +16,9 @@ class Stack{
         ~Stack();
         void push();
         Table pop();
-        Table top();
-        Table getGlobal();
+        Table* top();
+        Table* getGlobal();
+        int getSize();
 };
 }
 #endif

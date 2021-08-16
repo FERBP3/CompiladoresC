@@ -52,3 +52,12 @@ vector<int> C0::Symbol::getArgs(){
 int C0::Symbol::getNumArgs(){
     return args.size();
 }
+
+string C0::Symbol::toString(){
+    string cadena = "SYMBOL: "+id+" "+to_string(dir)+" "+to_string(type)+" "+typeVar+" [";
+    for (int i=0; i<args.size(); i++){
+        cadena += to_string(args[i]) + " ";
+    }
+    cadena += "]\n";
+    return cadena;
+}

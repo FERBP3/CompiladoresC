@@ -7,7 +7,8 @@
 using namespace std;
 
 C0::Table::Table(){
-    addType("int");
+    addType("void", 1);
+    addType("int", 4);
 }
 
 C0::Table::~Table(){
@@ -122,8 +123,10 @@ int C0::Table::addType(string name, int tam){
 }
 
 // TODO(17) Programar addType para que reciba un nombre: string, numeroItems:int, tipoBase:int
-int C0::Table::addType(string name, int numeroItems, int tipoBase){
-    typeTab.push_back(Type(name, tipoBase, numeroItems));
+int C0::Table::addType(string name, int tipoBase, int numItems){
+    int tam = numItems * getTam(tipoBase);
+    Type newType = Type(name, tipoBase, numItems, tam);
+    typeTab.push_back(newType);
     return typeTab.size()-1;
 }
 
@@ -185,3 +188,18 @@ vector<C0::Symbol>* C0::Table::getSyms(){
     return &symTab;
 }
 
+string C0::Table::toString(){
+    string cadena = "SIMBOLOS: "+to_string(symTab.size())+"\n";
+    cadena += "id dir type typeVar args\n";
+    for (int i=0; i<symTab.size(); i++){
+        cadena += symTab[i].toString();
+    }
+    cadena += "\nTIPOS: "+to_string(typeTab.size())+"\n";
+    cadena += "name numItems tam baseType\n";
+    for (int i=0; i<typeTab.size(); i++){
+        cadena += "TYPE "+to_string(i)+": "+typeTab[i].toString();
+    }
+    cadena += "\n";
+
+    return cadena;
+}

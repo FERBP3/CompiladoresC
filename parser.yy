@@ -36,7 +36,7 @@ using namespace std;
 
 #include "Driver.hpp"
 // TODO(62) Definir una variable externa numType: int
-extern int numType;
+//extern int numType;
 
 #undef yylex
 #define yylex scanner.yylex
@@ -68,7 +68,7 @@ extern int numType;
 
 %locations
 %start program
-%type<int> type arreglo base type_args parte_array
+%type<int> type base parte_array comp_arreglo
 //TODO (79) definir el no terminal list_args y args como vector<int>*
 %type<vector<int>*> list_args args
 //TODO (89) definir el no terminal list_param y params como vector<int>*
@@ -82,15 +82,23 @@ program
     :
     {
         driver.init();
+        //printf("%d\n",driver.getSizeTable());
     }
     declarations
-    {/* printf("programa:\n"); */}
+    {
+        printf("FIN programa\n");
+        printf("Tabla global\n%s\n", driver.getTablaGlobal().c_str());
+        printf("size pila: %d\n",driver.getSizeTable());
+
+    }
     ;
 
 declarations
     :
     declarations declaration
-    {/* printf("declarations\n"); */}
+    {
+        //printf("declarations\n");
+    }
     |
     %empty
     ;
@@ -99,7 +107,7 @@ declaration
     :
     type
     {
-    //printf("type\n");
+        driver.gType = $1;
     }
     decl_fun_var
     {
@@ -144,8 +152,7 @@ var
     :
     ID
     {
-        /* driver.variable($1); */
-        //printf("ID: %s\n", $1.c_str());
+        driver.variable($1);
     }
     ;
 
@@ -153,12 +160,11 @@ type
     :
     base  /* $1 */
     { /*$2*/
-        /* driver.basico = $1; */
-     //printf("base\n");
+        driver.gBase = $1;
     }
     comp_arreglo /*$3*/
     { /* $4 */
-       /* $$ =  $3; */
+        $$ = $3;
     }
     |
     STRUCT ID
@@ -168,14 +174,12 @@ base
     :
     VOID
     {
-        /* $$= 0; */
-        //printf("VOID\n");
+        $$ = 0;
     }
     |
     INT
     {
-        //printf("aqui hay un INT\n");
-        /* $$ = 1; */
+        $$ = 1;
     }
     |
     CHAR
@@ -189,12 +193,21 @@ comp_arreglo
     : LCOR NUMERO RCOR comp_arreglo
     {
         // TODO(64) Agregar las acciones semánticas para ingresar un tipo array
-        //printf("comp_arreglo %s\n", $2.c_str());
+        int num = stoi($2);
+        //printf("tam arr: %d\n", num);
+        //printf("comp_arreglo: %d\n", $4);
+        if (num > 0){
+            $$ = driver.addType("arreglo", num, $4);
+
+        }else{
+            printf("El indice debe ser mayor a cero\n");
+        }
     }
     |
     %empty
     {
-        // TODO(65) Agregar las acciones semánticas para convertir gBase en el tipo de arreglo
+       // TODO(65) Agregar las acciones semánticas para convertir gBase en el tipo de arreglo
+       $$ = driver.gBase;
     }
     ;
 

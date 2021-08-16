@@ -28,6 +28,7 @@ class Symbol{
         string getTypeVar();
         vector<int> getArgs();
         int getNumArgs();
+        string toString();
 };
 }
 #endif

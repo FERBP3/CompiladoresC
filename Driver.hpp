@@ -27,6 +27,11 @@ public:
    bool trace_parsing;
 
    void init();
+
+   // Funciones auxiliares
+   int getSizeTable();
+   string getTablaGlobal();
+
    //TODO(63) Definir el prototipo de una función que envuelva un push a tstack
    void pushTstack();
    //TODO(64) Definir el prototpio de una función que retorne un Table* al hacer pop a tstack
@@ -45,6 +50,7 @@ public:
    /*************************************************************************/
    /*     FUNCIONES QUE ENVUELVEN EL FUNCIONAMIENTO DE LA TABLA DE TIPOS */
    /*************************************************************************/
+   int addType(string id, int numItems, int tipoBase);
    // TODO(32) Agregar el prototipo para la funcion que envuelve a getName de la tabla de tipos
    string getName(int id);
    // TODO(33) Agregar el prototipo para la funcion que envuelve a getTam de la tabla de tipos

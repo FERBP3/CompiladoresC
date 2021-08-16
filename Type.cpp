@@ -5,10 +5,11 @@ C0::Type::Type(){
 
 }
 
-C0::Type::Type(string name, int baseType, int numItems){
+C0::Type::Type(string name, int baseType, int numItems, int tam){
     this->name = name;
     this->baseType =baseType;
     this->numItems = numItems;
+    this->tamBytes = tam;
 }
 
 C0::Type::Type(string name, int bytes){
@@ -46,3 +47,7 @@ C0::Table* C0::Type::getBase(){
     return base;
 }
 
+string C0::Type::toString(){
+    string cadena = name+" "+to_string(numItems)+" "+to_string(tamBytes)+" "+to_string(baseType)+"\n";
+    return cadena;
+}

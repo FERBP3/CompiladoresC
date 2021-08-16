@@ -20,7 +20,7 @@ class Type{
 
     public:
         Type();
-        Type(string name, int baseType, int numItems);
+        Type(string name, int baseType, int numItems, int tam);
         Type(string name, int bytes);
         ~Type();
         int getBaseType();
@@ -30,6 +30,8 @@ class Type{
         // TODO(3) Crear una función set y get para el nuevo dato miembro base
         C0::Table* getBase();
         void setBase(C0::Table* base);
+
+        string toString();
 };
 }
 #endif

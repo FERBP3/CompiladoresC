@@ -54,6 +54,8 @@ class Table{
         vector<C0::Type>* getTypes();
         // TODO(15) Definir el prototipo para getSyms, retorna un pauntador a la tabla de súmb
         vector<C0::Symbol>* getSyms();
+        //toString
+        string toString();
 
 };
 }
