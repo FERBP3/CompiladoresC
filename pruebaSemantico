@@ -1,3 +1,16 @@
-int x, y;
-int[2][3] w;
+struct Owo{
+    int ab;
+    int ac;
+} b;
 
+/*
+int suma(int a, int b){
+    return a;
+}
+*/
+
+void main(){
+    int miembro;
+    b.ab = miembro;
+    return;
+}

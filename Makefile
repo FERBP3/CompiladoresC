@@ -12,7 +12,7 @@ CXXSTD = -std=c++11
 CFLAGS = -Wno-deprecated-register -O0  $(CDEBUG) $(CSTD) 
 CXXFLAGS = -Wno-deprecated-register -O0  $(CXXDEBUG) $(CXXSTD)
 
-CPPOBJ = main Driver Expresion FinalCode PilaCount  Quad Table Symbol Type Stack 
+CPPOBJ = main Driver Expresion FinalCode PilaCount  Quad Table Symbol Type Stack Structure
 SOBJ =  parser lexer
 
 FILES = $(addsuffix .cpp, $(CPPOBJ))

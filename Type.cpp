@@ -5,16 +5,22 @@ C0::Type::Type(){
 
 }
 
-C0::Type::Type(string name, int baseType, int numItems, int tam){
+C0::Type::Type(string name, int baseType, int numItems){
     this->name = name;
     this->baseType =baseType;
     this->numItems = numItems;
-    this->tamBytes = tam;
 }
 
 C0::Type::Type(string name, int bytes){
     this->name = name;
     this->tamBytes = bytes;
+}
+
+C0::Type::Type(string name, int tipoBase, int numItems, int tam){
+    this->name = name;
+    this->baseType = tipoBase;
+    this->numItems = numItems;
+    this->tamBytes = tam;
 }
 
 C0::Type::~Type(){
@@ -48,6 +54,6 @@ C0::Table* C0::Type::getBase(){
 }
 
 string C0::Type::toString(){
-    string cadena = name+" "+to_string(numItems)+" "+to_string(tamBytes)+" "+to_string(baseType)+"\n";
+    string cadena = "TYPE: "+name+" "+to_string(numItems)+" "+to_string(tamBytes)+" "+to_string(baseType)+"\n";
     return cadena;
 }

@@ -9,13 +9,11 @@ using namespace std;
 
 #include "Scanner.hpp"
 #include "parser.tab.hh"
-// TODO(26) Quitar Table.h
-//#include "Table.h"
-// TODO(27) Incluir Stack.h
 #include "Stack.h"
 #include "Expresion.h"
 #include "Quad.h"
 #include "PilaCount.h"
+#include "Structure.h"
 
 namespace C0{
 class Driver{
@@ -30,41 +28,49 @@ public:
 
    // Funciones auxiliares
    int getSizeTable();
-   string getTablaGlobal();
+   string getTablaGlobalString();
+   Table* getTablaGlobal();
+   Table* getTablaTop();
+
 
    //TODO(63) Definir el prototipo de una función que envuelva un push a tstack
    void pushTstack();
    //TODO(64) Definir el prototpio de una función que retorne un Table* al hacer pop a tstack
-   Table popTstack();
+   Table* popTstack();
    /*************************************************************************/
    /*     FUNCIONES QUE ENVUELVEN EL FUNCIONAMIENTO DE LA TABLA DE SÍMBOLOS */
    /*************************************************************************/
    bool isInSymbol(string id);
+   bool isInSymbolGlobal(string id);
+
    void addSymbol(string id);
    void setDir(string id, int dir);
    int getDir(string id);
    void setType(string id, int type);
    int getType(string id);
+   int getTypeGlobal(string id);
+   string getTypeVarGlobal(string id);
+   vector<int> getArgsGlobal(string id);
+
    void setVar(string id, string var);
    string getVar(string id);
    /*************************************************************************/
    /*     FUNCIONES QUE ENVUELVEN EL FUNCIONAMIENTO DE LA TABLA DE TIPOS */
    /*************************************************************************/
    int addType(string id, int numItems, int tipoBase);
-   // TODO(32) Agregar el prototipo para la funcion que envuelve a getName de la tabla de tipos
-   string getName(int id);
-   // TODO(33) Agregar el prototipo para la funcion que envuelve a getTam de la tabla de tipos
+   string getNameTop(int id);
+   string getClaseTop(string name);
+   string getClaseGlobal(string name);
+
    int getTam(int id);
-   // TODO(34) Agregar el prototipo para la funcion que envuelve a getTipoBase de la tabla de tipos
    int getTipoBase(int id);
-   // TODO(35) Agregar el prototipo para la funcion que envuelve a getNumImtes de la tabla de tipos
    int getNumItems(int id);
-   // TODO(36) Agregar el prototipo para la funcion que envuelve a getBase de la tabla de tipos
    Table* getBase(int id);
-   // TODO(37) Agregar el prototipo para la funcion que envuelve a setBase de la tabla de tipos
-   void setBase(int id, Table *base);
-   // TODO(69)  Agregar el prototipo para una función que agregue un tipo nuevo struct recibe: "struct", Table *t
-   //void addTypeStruct(string name, Table *t);
+   Table* getBaseGlobal(int id);
+
+   void setBase(int id, Table* base);
+   int addTypeStruct(string name, Table* t);
+   void setArgsFunc(string id, vector<int> args);
 
    /****************************************************/
    /*     FUNCIONES QUE REALIZAN EL ANÁLISIS SEMÁNTICO */
@@ -84,7 +90,7 @@ public:
    void asign(string id, Expresion e2); 
    void writew(Expresion e);
    void writes(string s, int c);
-   void variable(string id);
+   bool variable(string id);
    /***********************************************/
    /*     FUNCIONES QUE GENERAN CÓDIGO INTERMEDIO */
    /***********************************************/ 
@@ -134,6 +140,10 @@ public:
    int gBase;
    // TODO(38) Crear una variable miembro llamada dirStack de tipo apuntador a PilaCount
    PilaCount* dirStack;
+   PilaCount* typeStack;
+   vector<int> gReturnList;
+   stack<string> globalId;
+   //string gId;
 };
 }
 

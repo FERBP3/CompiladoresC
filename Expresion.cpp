@@ -20,3 +20,5 @@ int C0::Expresion::getType(){
 string C0::Expresion::getDir(){
     return dir;
 }
+
+

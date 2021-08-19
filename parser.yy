@@ -1,18 +1,17 @@
 %skeleton "lalr1.cc"
 %require  "3.0"
-%debug 
-%defines 
+%debug
+%defines
 %define api.namespace {C0}
 %define api.parser.class {Parser}
 
 %code requires{
 
-// TODO(60) Incluir a Numero.h
-// TODO(61) Incluir a Expresion.h
 #include "Expresion.h"
+#include "Structure.h"
 namespace C0 {
     class Driver;
-    class Scanner;      
+    class Scanner;
 }
 
 // The following definitions is missing when %locations isn't used
@@ -27,6 +26,7 @@ namespace C0 {
 
 %parse-param { Scanner  &scanner  }
 %parse-param { Driver  &driver  }
+
 
 %code{
 #include <iostream>
@@ -45,6 +45,7 @@ using namespace std;
 %define api.value.type variant
 %define parse.assert
 
+%locations
 %token <std::string>    ID
 %token <std::string>    NUMERO
 %token <std::string>    STRING
@@ -66,39 +67,30 @@ using namespace std;
 %nonassoc               IFX
 %nonassoc               ELSE
 
-%locations
 %start program
-%type<int> type base parte_array comp_arreglo
-//TODO (79) definir el no terminal list_args y args como vector<int>*
-%type<vector<int>*> list_args args
-//TODO (89) definir el no terminal list_param y params como vector<int>*
-%type<vector<int>*> list_params params
-//TODO(95) definir el no terminal param como int
-%type<int> arg param
-%type<Expresion> expresion condicion
+%type<int> type base comp_arreglo arg param type_param
+%type<vector<int>> list_args list_params args params parte_array
+%type<Expresion> expresion condicion complemento left_part
+%type<Structure> comp_struct
 
 %%
 program
     :
     {
         driver.init();
-        //printf("%d\n",driver.getSizeTable());
+
     }
     declarations
     {
         printf("FIN programa\n");
-        printf("Tabla global\n%s\n", driver.getTablaGlobal().c_str());
-        printf("size pila: %d\n",driver.getSizeTable());
-
+        printf("Tabla global\n%s\n", driver.getTablaGlobalString().c_str());
+        //printf("size pila: %d\n",driver.getSizeTable());
     }
     ;
 
 declarations
     :
     declarations declaration
-    {
-        //printf("declarations\n");
-    }
     |
     %empty
     ;
@@ -108,11 +100,9 @@ declaration
     type
     {
         driver.gType = $1;
+        //printf("type\n");
     }
     decl_fun_var
-    {
-    //printf("decl_fun_var\n");
-    }
     |
     decl_struct
     ;
@@ -120,30 +110,13 @@ declaration
 decl_fun_var
     :
     list_var PYC
-    {
-        /* driver.type = $1; */
-        /* driver.current_type = $1; */
-        /* driver.setType() */
-        /* printf("list_var PYC\n"); */
-    }
     |
     decl_fun
     ;
 
 list_var
     :
-    list_var
-    { 
-    // printf("list_var \n");
-    }
-    COMA
-    {
-    // printf("COMA \n");
-    }
-    var
-    {
-     //printf("var \n");
-    }
+    list_var COMA var
     |
     var
     ;
@@ -152,22 +125,52 @@ var
     :
     ID
     {
-        driver.variable($1);
+        if(driver.isInSymbol($1) || driver.gBase == 0){
+            printf("La variable '%s' ya fue declarada o no puede ser de tipo void\n", $1.c_str());
+            //YYERROR;
+        }else{
+            driver.addSymbol($1);
+            driver.setType($1, driver.gType);
+            driver.setDir($1, driver.gDir);
+            driver.setVar($1, "variable");
+            driver.gDir+= driver.getTam(driver.gType);
+        }
     }
     ;
 
 type
     :
-    base  /* $1 */
-    { /*$2*/
+    base
+    {
         driver.gBase = $1;
     }
-    comp_arreglo /*$3*/
-    { /* $4 */
+    comp_arreglo
+    {
         $$ = $3;
     }
     |
     STRUCT ID
+    {
+        //printf("struct id\n");
+        if (driver.isInSymbol($2)){
+            if (driver.getClaseTop($2) == "struct"){
+                $$ = driver.getType($2);
+            }else{
+                printf("El ID no representa un estructura\n");
+                //YYERROR;
+            }
+        }else if (driver.isInSymbolGlobal($2)){
+            if (driver.getClaseGlobal($2) == "struct"){
+                $$ = driver.getTypeGlobal($2);
+            }else{
+                printf("El ID no representa un estructura\n");
+                //YYERROR;
+            }
+        }else{
+            printf("El id no existe\n");
+            //YYERROR;
+        }
+    }
     ;
 
 base
@@ -183,30 +186,36 @@ base
     }
     |
     CHAR
+    {
+        $$ = 2;
+    }
     |
     FLOAT
+    {
+        $$ = 3;
+    }
     |
     DOUBLE
+    {
+        $$ = 4;
+    }
     ;
 
 comp_arreglo
     : LCOR NUMERO RCOR comp_arreglo
     {
-        // TODO(64) Agregar las acciones semánticas para ingresar un tipo array
         int num = stoi($2);
-        //printf("tam arr: %d\n", num);
-        //printf("comp_arreglo: %d\n", $4);
         if (num > 0){
             $$ = driver.addType("arreglo", num, $4);
 
         }else{
             printf("El indice debe ser mayor a cero\n");
+            //YYERROR;
         }
     }
     |
     %empty
     {
-       // TODO(65) Agregar las acciones semánticas para convertir gBase en el tipo de arreglo
        $$ = driver.gBase;
     }
     ;
@@ -214,15 +223,53 @@ comp_arreglo
 decl_struct
     :
     STRUCT LKEY{
-        // TODO(66) Agregar las acciones semánticas para push en tstack
+        driver.pushTstack();
+        driver.dirStack->push(driver.gDir);
+        driver.gDir = 0;
     } body_struct RKEY
     {
-        // TODO(67) Agregar las acciones semánticas para recuperar la tabla de la cima
-        // TODO(68) Agregar un tipo nuevo a la tabla de tipos de tipo struct
-        // TODO(71) Hacer gType igual a lo que regres la tabla de tipos al insertar el struct
+        driver.gDir = driver.dirStack->pop();
+        Table* tabla = driver.popTstack();
+        driver.gType = driver.addTypeStruct("struct", tabla);
     } list_var PYC
     |
-    STRUCT ID LKEY body_struct RKEY list_var PYC
+    STRUCT ID
+    {
+        //printf("aqui");
+        driver.pushTstack();
+        driver.dirStack->push(driver.gDir);
+        driver.gDir = 0;
+    }
+    LKEY body_struct RKEY
+    {
+        driver.gDir = driver.dirStack->pop();
+        Table* tabla = driver.popTstack();
+        driver.gType = driver.addTypeStruct("struct", tabla);
+        //printf("Tabla global desde struct \n%s\n", driver.getTablaGlobalString().c_str());
+
+        //vector<Type>* tipos = driver.getTablaGlobal()->getTypes();
+        //printf("size de tipos: %lu\n", tipos->size());
+        /*
+        for (int i=0; i<tipos->size(); i++){
+            printf("%s\n", tipos->at(i).toString().c_str());
+        }
+        Type t = tipos->at(driver.gType);
+        printf("%s\ntabla:%s\n\n",t.toString().c_str(), t.getBase()->toString().c_str());
+        */
+
+        // aqui funciona bien la tabla
+        //printf("Tabla STRUCT\n%s\n\n", tabla.toString().c_str());
+
+        if (driver.isInSymbol($2)){
+            printf("La variable ya fue declarada\n");
+            //YYERROR;
+        }else{
+            driver.addSymbol($2);
+            driver.setType($2, driver.gType);
+            driver.setVar($2, "struct");
+        }
+    }
+    list_var PYC
     ;
 
 body_struct
@@ -234,78 +281,140 @@ body_struct
 
 decl_fun
     :
-    ID
+    ID LPAR
     {
-    //printf("ID FUNC: %s\n", $1.c_str());
+        driver.pushTstack();
+        driver.dirStack->push(driver.gDir);
+        driver.typeStack->push(driver.gType);
+        driver.gDir = 0;
+
+        driver.gReturnList.clear();
     }
-
-    LPAR list_params
+    list_params RPAR LKEY decl_locales bloqueSentencias RKEY
     {
-    //printf("finish list_params\n");
-    }
+        driver.gDir = driver.dirStack->pop();
+        driver.popTstack();
+        int current_type_fun = driver.typeStack->pop();
 
-    RPAR LKEY decl_locales
-    {
-    //printf("finish decl_locales\n");
-    }
-
-    bloqueSentencias
-    {
-    //printf("finish bloqueSentencias");
-    }
-
-    RKEY
-    {
-        // TODO(74) Donde hacer un push a tskack **
-
-        // TODO(75) Hacer pop a tskack
-        // TODO(76) Validar que el id no está en la tabla de símbolos
-        // TODO](77) En caso de no estar agregarlo
-        // TODO(78) Agregar que es tipo func, su tipo de retorno, y su lista de paramétros
-        // Almacenada en list_args
-        //printf("finish FUNC: %s\n", $1.c_str());
+        if (driver.isInSymbol($1)){
+            printf("El id de la funcion ya fue declarado\n");
+            //YYERROR;
+        }else{
+            for(int i=0; i<driver.gReturnList.size(); i++){
+                if (driver.gReturnList[i] != current_type_fun){
+                    printf("La sentencia de retorno no devuelve el tipo correcto de dato\n");
+                    //YYERROR;
+                }
+            }
+            driver.addSymbol($1);
+            driver.setType($1, current_type_fun);
+            driver.setVar($1, "func");
+            driver.setArgsFunc($1, $4);
+            //TODO genCode
+        }
     }
     ;
 
 list_params
     :
     params
+    {
+        $$ = $1;
+    }
     |
     %empty
+    {
+        $$.clear();
+    }
     ;
 
 params
     :
     params COMA param
+    {
+        $1.push_back($3);
+        $$ = $1;
+    }
     |
     param
+    {
+        $$.clear();
+        $$.push_back($1);
+    }
     ;
 
 param
     :
     type_param ID
     {
-    //printf("finish type_param id\n");
+        if (driver.isInSymbol($2)){
+            printf("El id de la funcion ya fue declarado\n");
+            //YYERROR;
+        }else{
+            driver.addSymbol($2);
+            driver.setType($2, $1);
+            driver.setVar($2, "param");
+            driver.setDir($2, driver.gDir);
+            driver.gDir+= driver.getTam($1);
+        }
+        $$ = $1;
     }
     ;
 
 type_param
     :
+    base
+    {
+        $$ = $1;
+    }
+    |
     base parte_array
+    {
+        int lastType = driver.addType("arreglo", $2[0], $1);
+        for (int i=1; i<$2.size(); i++){
+            lastType = driver.addType("arreglo", $2[i], lastType);
+        }
+        $$ = lastType;
+    }
     |
     STRUCT ID
+    {
+        if (driver.isInSymbol($2)){
+
+            if (driver.getClaseTop($2) == "struct"){
+                $$ = driver.getType($2);
+            }else{
+                printf("El id no representa una estructura\n");
+                //YYERROR;
+            }
+
+        }else if (driver.isInSymbolGlobal($2)){
+            if (driver.getClaseGlobal($2) == "struct"){
+                $$ = driver.getTypeGlobal($2);
+            }else{
+                printf("El id no representa una estructura\n");
+                //YYERROR;
+            }
+        }else{
+            printf("El id no esta declarado\n");
+            //YYERROR;
+        }
+    }
     ;
 
 parte_array
     :
-    parte_array LCOR NUMERO RCOR
+    LCOR NUMERO RCOR parte_array
     {
-    //printf("corchetes y numero\n");
+        int num = stoi($2);
+        $4.push_back(num);
+        $$ = $4;
     }
     |
-    LCOR RCOR
+    LCOR RCOR parte_array
     {
-    //printf("corchetes\n");
+        $3.push_back(-1);
+        $$ = $3;
     }
     |
     %empty
@@ -316,9 +425,6 @@ decl_locales
     decl_locales decl_local
     |
     %empty
-    {
-    //printf("finish decl_locales empty\n");
-    }
     ;
 
 decl_local
@@ -330,7 +436,12 @@ decl_local
 
 decl_var
     :
-    type list_var PYC
+    type
+    {
+        driver.gType = $1;
+    }
+    list_var PYC
+    ;
 
 bloqueSentencias
     :
@@ -369,51 +480,76 @@ sentencia
     sentSwitch
     ;
 
-
 sentReturn
     :
     RETURN expresion PYC
+    {
+        driver.gReturnList.push_back($2.getType());
+        //TODO genCode
+    }
     |
     RETURN PYC
+    {
+        driver.gReturnList.push_back(0);
+    }
     ;
 
 sentProc
     :
     ID LPAR list_args RPAR PYC
+    {
+        string typeVar = driver.getTypeVarGlobal($1);
+        if (driver.isInSymbolGlobal($1) && typeVar == "func"){
+            vector<int> args = driver.getArgsGlobal($1);
+            if (args.size() != $3.size()){
+                printf("El numero de argumentos no coincide\n");
+                //YYERROR;
+            }else{
+                for (int i=0; i<args.size(); i++){
+                    if (args[i] != $3[i]){
+                        printf("El tipo de argumentos no coincide\n");
+                        //YYERROR;
+                    }
+                }
+                //TODO genCode
+            }
+        }else{
+            printf("El id no existe o no hace referencia a una función\n");
+            //YYERROR;
+        }
+    }
     ;
 
 list_args
     :
     args
     {
-        // TOTOD(80) Hacer que list_args.lista =  args.lista
+        $$ = $1;
     }
-    | 
+    |
     %empty
-    {
-        // TODO(81) Hacer list_args.lista = nullptr
-    }
     ;
 
 args
     :
     args COMA arg
     {
-        // TODO(82) Agregar arg.type a args1.lista
-        // TODO(83) Hacer args.lista = args1.lista
+        $1.push_back($3);
+        $$ = $1;
     }
     |
     arg
     {
-        // TODO(84) Agregar arg.type a args.lista
+        $$.clear();
+        $$.push_back($1);
     }
     ;
 
 arg
     :
-    expresion {
-        // TODO(85) validar que el id no se ha declarado
-        // TODO(85) Hacer arg.type = base.type
+    expresion 
+    {
+        $$ = $1.getType();
     }
     ;
 
@@ -433,32 +569,84 @@ expresion
     |
     NUMERO
     {
-    //printf("finish numero expresion %s\n", $1.c_str());
+        // Por ahora solo es entero
+        $$ = Expresion($1, 1);
     }
     |
     ID
     {
-    //printf("finish id expresion %s\n", $1.c_str());
+        //printf("agregando id global: %s\n", $1.c_str());
+        driver.globalId.push($1);
     }
     complemento
     {
-    //printf("finish complemento expresion\n");
+        $$ = Expresion($3.getDir(), $3.getType());
     }
     ;
 
 complemento
     :
     comp_struct
+    {
+        string gId = driver.globalId.top();
+        driver.globalId.pop();
+
+        if ($1.base == gId){
+            $$ = Expresion(gId, $1.type);
+        }else{
+            $$ = Expresion(gId+"["+to_string($1.des)+"]", $1.type);
+        }
+
+    }
     |
     array
     |
-    LPAR
-    list_args
-    RPAR
-    {//printf("finish list_params complemento\n");
+    LPAR list_args RPAR
+    {
+        /* Casi igual a sentProc */
+        string gId = driver.globalId.top();
+        driver.globalId.pop();
+        //printf("pop id global: %s\n", gId.c_str());
+
+        string typeVar = driver.getTypeVarGlobal(gId);
+        if (driver.isInSymbolGlobal(gId) && typeVar == "func"){
+            vector<int> args = driver.getArgsGlobal(gId);
+            if (args.size() != $2.size()){
+                printf("El numero de argumentos no coincide\n");
+                //YYERROR;
+            }else{
+                for (int i=0; i<args.size(); i++){
+                    if (args[i] != $2[i]){
+                        printf("El tipo de argumentos no coincide\n");
+                        //YYERROR;
+                        break;
+                    }
+                }
+                // TODO nuevaTemporal ?
+                $$ = Expresion(gId, driver.getTypeGlobal(gId));
+                //TODO genCode
+            }
+        }else{
+            printf("El id %s no existe o no hace referencia a una función\n", gId.c_str());
+            //YYERROR;
+        }
     }
     |
     %empty
+    {
+        string gId = driver.globalId.top();
+        driver.globalId.pop();
+        //printf("pop id global: %s\n", gId.c_str());
+
+        if (driver.isInSymbol(gId)){
+
+            $$ = Expresion(gId, driver.getType(gId));
+            //printf("id: %s type:%d\n", $$.getDir().c_str(), $$.getType());
+        }else{
+            printf("El id de retorno no está declarado\n");
+            //YYERROR;
+        }
+    }
     ;
 
 array
@@ -598,7 +786,7 @@ sentAsig
     :
     left_part
     {
-    //printf("finish left part\n");
+        //printf("finish left part\n");
     }
     ASIG expresion PYC
     ;
@@ -606,7 +794,21 @@ sentAsig
 
 left_part
     :
-    ID comp_struct
+    ID
+    {
+        driver.globalId.push($1);
+    }
+    comp_struct
+    {
+        string gId = driver.globalId.top();
+        driver.globalId.pop();
+
+        if ($3.base == gId){
+            $$ = Expresion(gId, $3.type);
+        }else{
+            $$ = Expresion(gId+"["+to_string($3.des)+"]", $3.type);
+        }
+    }
     |
     ID array
     ;
@@ -614,8 +816,52 @@ left_part
 comp_struct
     :
     comp_struct DOT ID
+    {
+        if ($1.clase == "struct"){
+            if ($1.tabla->isInSymbol($3)){
+                $$.des = $1.des + $1.tabla->getDir($3);
+                $$.clase = $1.tabla->getClase($3);
+                $$.type = $1.tabla->getType($3);
+                $$.tabla = $1.tabla->getBase($$.type);
+                $$.base = $3;
+            }else{
+            printf("El id: '%s' no es un miembro de la estructura %s\n", $3.c_str(), $1.base.c_str());
+            //printf("Tabla STRUCT\n%s\n\n", $1.tabla->toString().c_str());
+            //YYERROR;
+            }
+        }else{
+            printf("El comp_struct1.base: '%s' no es una estructura\n", $1.base.c_str());
+            //YYERROR;
+        }
+    }
     |
     %empty
+    {
+        string gId = driver.globalId.top();
+
+        if (driver.isInSymbol(gId)){
+            $$.clase = driver.getClaseTop(gId);
+            $$.type = driver.getType(gId);
+            $$.tabla = driver.getBase($$.type);
+            $$.base = gId;
+            $$.des = 0;
+
+            //printf("id encontrado en tope: %s\n", gId.c_str());
+
+        }else if (driver.isInSymbolGlobal(gId)){
+            $$.clase = driver.getClaseGlobal(gId);
+            $$.type = driver.getTypeGlobal(gId);
+            $$.tabla = driver.getBaseGlobal($$.type);
+            $$.base = gId;
+            $$.des = 0;
+
+            //printf("id encontrado en global: %s type: %d\n", gId.c_str(), $$.type);
+            //printf("Tabla STRUCT\n%s\n\n", $$.tabla->toString().c_str());
+        }else{
+            printf("El id '%s' no fue declarado\n", gId.c_str());
+            //YYERROR;
+        }
+    }
     ;
 
 sentPutw

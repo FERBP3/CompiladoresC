@@ -112,10 +112,6 @@ vector<int> C0::Table::getArgs(string id){
     return a;
 }
 
-vector<C0::Symbol> C0::Table::getSymTab(){
-    return symTab;
-}
-
 // TODO(16) Programar addType para que reciba un nombre: string, tam:int
 int C0::Table::addType(string name, int tam){
     typeTab.push_back(Type(name, tam));
@@ -130,6 +126,17 @@ int C0::Table::addType(string name, int tipoBase, int numItems){
     return typeTab.size()-1;
 }
 
+int C0::Table::addTypeStruct(string name, Table* t){
+    int bytes = t->getFullTam();
+    typeTab.push_back(Type(name, bytes));
+    int index = typeTab.size()-1;
+
+    setBase(index, t);
+    //printf("addType Table indice: %d\n %s\n\n", index, typeTab[index].getBase()->toString().c_str());
+
+    return index;
+}
+
 // TODO(18) Programar getName para tabla de tipos, recibe id:int
 string C0::Table::getName(int id){
     if (id < 0 || id >= typeTab.size()){
@@ -137,6 +144,7 @@ string C0::Table::getName(int id){
     }
     return typeTab[id].getName();
 }
+
 
 // TODO(19) Programar getNumItems, recibe id:int
 int C0::Table::getNumItems(int id){
@@ -162,20 +170,27 @@ int C0::Table::getTipoBase(int id){
     return typeTab[id].getBaseType();
 }
 
-// TODO(22) Programar getBase, recibe id:int
 C0::Table* C0::Table::getBase(int id){
     if (id < 0 || id >= typeTab.size()){
         return nullptr;
     }
-    return typeTab[id].getBase();
+    Table* t = typeTab[id].getBase();
+
+    //printf("%s\n", typeTab[2].toString().c_str());
+    //printf("getBase RETURN %d:\n %s\n\n", id, t->toString().c_str());
+    return t;
 }
 
-// TODO(23) Programar setBase, recibe id:int y t:*Tabl
+string C0::Table::getClase(string name){
+    return getName(getType(name));
+}
+
 void C0::Table::setBase(int id, Table* t){
     if (id < 0 || id >= typeTab.size()){
         return;
     }
     typeTab[id].setBase(t);
+    //printf("setBase %d:\n %s\n\n", id, typeTab[id].getBase()->toString().c_str());
 }
 
 // TODO(24) Programar getTypes, retorna un apuntador a la tabla de tipos
@@ -186,6 +201,15 @@ vector<C0::Type>* C0::Table::getTypes(){
 // TODO(25) Programar getSyms, retorna un pauntador a la tabla de súmb
 vector<C0::Symbol>* C0::Table::getSyms(){
     return &symTab;
+}
+
+int C0::Table::getFullTam(){
+    int sumTam = 0;
+    for (int i=0; i<symTab.size(); i++){
+        int t = symTab[i].getType();
+        sumTam += typeTab[t].getTamBytes(); 
+    }
+    return sumTam;
 }
 
 string C0::Table::toString(){

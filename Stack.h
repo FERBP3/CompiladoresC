@@ -8,14 +8,14 @@ using namespace std;
 namespace C0{
 class Stack{
     private:
-        C0::Table global;
-        stack<C0::Table> pila;
+        C0::Table* global;
+        stack<C0::Table*> pila;
 
     public:
         Stack();
         ~Stack();
         void push();
-        Table pop();
+        Table* pop();
         Table* top();
         Table* getGlobal();
         int getSize();

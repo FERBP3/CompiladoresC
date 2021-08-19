@@ -8,18 +8,20 @@ bool coment = false;
 #define YY_DECL int C0::Scanner::yylex( C0::Parser::semantic_type * const lval, C0::Parser::location_type *location )
 
 using token = C0::Parser::token;
-
+//#include "parser.tab.hh"
 
 #define YY_NO_UNISTD_H
 #define YY_USER_ACTION loc->step(); loc->columns(yyleng);
+//#define YY_USER_ACTION yylloc->first_line = yylloc->last_line = yylineno;
 
 %}
 
+
+%option yylineno
 %option debug
 %option nodefault
 %option yyclass="C0::Scanner"
 %option c++
-%option yylineno
 
 cadena \"([\x20-\x21\x23-\xFE])*\"
 %s COMENTARIO
@@ -220,7 +222,7 @@ cadena \"([\x20-\x21\x23-\xFE])*\"
          }
 
 
-\n          {
+"\n"          {
                /** Update line number **/
                loc->lines();
             }

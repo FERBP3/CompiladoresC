@@ -52,32 +52,41 @@ void C0::Driver::parse_helper(std::istream &stream) {
 }
 
 void C0::Driver::init() {
-    // TODO(39) Borrar la línea 56
-    //table = new Table();
-    // TODO(40) Crear el apuntador a stack de tipo Stack 
     tstack = Stack();
     gDir = 0;
     iStack = new PilaCount();
     wStack = new PilaCount();
-    // TODO(41) Crear el apuntador a dirStack similar a iStack
     numIf = 0;
     numWhile = 0;
     numTemp = 0;
     numString = 0;
-    // TODO(42) Asignar un valor inicial de cero a gType
     gType = -1;
-    // TODO(43) Asignar un valor inicial de cero a gBase
     gBase = -1;
     int pos = filename.find(".");
     output = filename.substr(0,pos-1)+".ens";
+    dirStack = new PilaCount();
+    typeStack = new PilaCount();
+    //gId = "";
 }
 
 int C0::Driver::getSizeTable(){
     return tstack.getSize();
 }
 
-string C0::Driver::getTablaGlobal(){
-    return tstack.top()->toString();
+string C0::Driver::getTablaGlobalString(){
+    return tstack.getGlobal()->toString();
+}
+
+C0::Table* C0::Driver::getTablaGlobal(){
+    return tstack.getGlobal();
+}
+
+C0::Table* C0::Driver::getTablaTop(){
+    return tstack.top();
+}
+
+bool C0::Driver::isInSymbolGlobal(string id){
+    return tstack.getGlobal()->isInSymbol(id);
 }
 
 string C0::Driver::newLabel(int n) {
@@ -94,39 +103,40 @@ string C0::Driver::newTemp() {
 }
 
 bool C0::Driver::isInSymbol(string id) {
-    // TODO(43) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    //return table->isInSymbol(id);
     return tstack.top()->isInSymbol(id);
 }
 
 void C0::Driver::addSymbol(string id) {
-    // TODO(44) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    //table->addSymbol(id);
     tstack.top()->addSymbol(id);
 }
 
 void C0::Driver::setDir(string id, int dir) {
-    // TODO(45) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    //table->setDir(id, dir);
     tstack.top()->setDir(id, dir);
 
 }
 
 void C0::Driver::setType(string id, int type) {
-    // TODO(46) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    //table->setType(id, type);
     tstack.top()->setType(id, type);
 }
 
 int C0::Driver::getType(string id) {
-    // TODO(47) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    //return table->getType(id);
     return tstack.top()->getType(id);
+}
+
+int C0::Driver::getTypeGlobal(string id) {
+    return tstack.getGlobal()->getType(id);
+}
+
+string C0::Driver::getTypeVarGlobal(string id){
+    return tstack.getGlobal()->getTypeVar(id);
+}
+
+vector<int> C0::Driver::getArgsGlobal(string id){
+    return tstack.getGlobal()->getArgs(id);
 }
 
 int C0::Driver::addType(string id, int numItems, int tipoBase){
     int next = tstack.top()->addType(id, tipoBase, numItems);
-    printf("next %d\n", next);
 
     return next;
 }
@@ -134,13 +144,11 @@ int C0::Driver::addType(string id, int numItems, int tipoBase){
 
 void C0::Driver::setVar(string id, string var) {
     // TODO(48) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    //table->setTypeVar(id, var);
     tstack.top()->setTypeVar(id, var);
 }
 
 string C0::Driver::getVar(string id) {
     // TODO(49) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    //return table->getTypeVar(id);
     return tstack.top()->getTypeVar(id);
 }
 
@@ -365,10 +373,16 @@ void C0::Driver::addQuad(Quad q) {
 }
 
 // TODO(54) Programar la funcion miembro que envuelve a getName de la tabla de tipos
-string C0::Driver::getName(int id){
-
-    printf("driver_getName\n");
+string C0::Driver::getNameTop(int id){
     return tstack.top()->getName(id);
+}
+
+string C0::Driver::getClaseTop(string name){
+    return tstack.top()->getClase(name);
+}
+
+string C0::Driver::getClaseGlobal(string name){
+    return tstack.getGlobal()->getClase(name);
 }
 
 // TODO(55) Programar la funcion miembro que envuelve a getTam de la tabla de tipos
@@ -386,39 +400,58 @@ int C0::Driver::getNumItems(int id){
     return tstack.top()->getNumItems(id);
 }
 
-// TODO(58) Programar la funcion miembro que envuelve a getBase de la tabla de tipos
+// Funcion miembro que envuelve a getBase de la tabla de tipos
 C0::Table* C0::Driver::getBase(int id){
     return tstack.top()->getBase(id);
 }
 
+C0::Table* C0::Driver::getBaseGlobal(int id){
+    //printf("id getBase: %d\n", id);
+    return tstack.getGlobal()->getBase(id);
+}
+
 // TODO(59) Programar la funcion miembro que envuelve a setBase de la tabla de tipos   
-void C0::Driver::setBase(int id, Table *base){
+void C0::Driver::setBase(int id, Table* base){
     tstack.top()->setBase(id, base);
 }
 
-void C0::Driver::variable(string id){
-    if(isInSymbol(id) || gBase == 0)
-        cout<<"La variable ya fue declarada o no puede ser de tipo void"<<endl;
-    else{
+void C0::Driver::setArgsFunc(string id, vector<int> args){
+    tstack.top()->setArgs(id, args);
+}
+
+
+bool C0::Driver::variable(string id){
+    if(isInSymbol(id) || gBase == 0){
+        cerr<<"La variable ya fue declarada o no puede ser de tipo void"<<endl;
+        return false;
+    }else{
         addSymbol(id);
         setType(id, gType);
         setDir(id, gDir);
         setVar(id, "variable");
         gDir+= getTam(gType);
+        return true;
     }
 }
 
 
-//TODO(65) Programar la función miembro que envuelva un push a tstack
+//Función miembro que envuelva un push a tstack
 void C0::Driver::pushTstack(){
     tstack.push();
 }
 
-//TODO(66) Programar la función miembro que retorne un Table* al hacer pop a tstack
-C0::Table C0::Driver::popTstack(){
-    C0::Table t = tstack.pop();
-    return t;
+//Función miembro que retorna un Table* al hacer pop a tstack
+C0::Table* C0::Driver::popTstack(){
+    return tstack.pop();
 }
 
-//TODO(70) Programar la función miembro que añade el tipo struct a la tabla de tipos
+//Función miembro que añade el tipo struct a la tabla de tipos
 // Como consejo usar la función miembro de Table setBase(Table *t)
+int C0::Driver::addTypeStruct(string name, Table* t){
+    int index = tstack.top()->addTypeStruct(name, t);
+    //aqui funciona bien tabla
+    //printf("addTypeStruct Driver:\n %s\n\n", t.toString().c_str());
+    //return last_index;
+    return index;
+}
+
