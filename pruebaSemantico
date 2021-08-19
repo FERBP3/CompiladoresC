@@ -1,18 +1,23 @@
 /*
 int[2][3] myarreglo;
-*/
 
 struct Owo{
+    struct Owo2 {
+        int bc;
+        int bd;
+    } b;
     int ab;
     int ac;
-} b;
+} a;
 
 
 struct Owo suma(struct Owo myOwo){
     return myOwo;
 }
 
+*/
 void main(){
-    int otro;
+    int myInt;
+    myInt = 4;
     return;
 }

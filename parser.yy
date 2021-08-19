@@ -86,7 +86,7 @@ program
     {
         printf("FIN programa\n");
         printf("Tabla global\n%s\n", driver.getTablaGlobalString().c_str());
-        //printf("size pila: %d\n",driver.getSizeTable());
+        driver.printCI();
     }
     ;
 
@@ -102,7 +102,6 @@ declaration
     type
     {
         driver.gType = $1;
-        //printf("type\n");
     }
     decl_fun_var
     |
@@ -313,6 +312,7 @@ decl_fun
             driver.setVar($1, "func");
             driver.setArgsFunc($1, $4);
             //TODO genCode
+            driver._label($1);
         }
     }
     ;
@@ -598,7 +598,6 @@ complemento
         }else{
             $$ = Expresion(gId+"["+to_string($1.des)+"]", $1.type);
         }
-
     }
     |
     array
@@ -862,6 +861,8 @@ sentAsig
     left_part ASIG expresion PYC
     {
         //TODO genCode
+        // reducir
+        driver.asign($1.getDir(),$3);
     }
     ;
 

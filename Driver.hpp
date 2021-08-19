@@ -104,7 +104,7 @@ public:
    void _if(Expresion e, int n);   
    void _while(Expresion e, int n);   
    void _goto(string label, int n);
-   void _label(string label, int n);
+   void _label(string id);
    string newLabel(int n);
    string newTemp();
    void printCI();
@@ -119,8 +119,6 @@ public:
 
    
 private:
-   // TODO(28) Borrar la definición de Table C0::Table *table = nullptr;   
-   // TODO(29) Añadir un nuevo miembro llamado tstack de tipo Stack
    C0::Stack tstack;
    void parse_helper( std::istream &stream );
    C0::Parser  *parser  = nullptr;

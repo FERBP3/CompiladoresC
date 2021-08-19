@@ -272,9 +272,7 @@ C0::Expresion C0::Driver::distinct(Expresion e1, Expresion e2) {
 }
 
 void C0::Driver::asign(string id, Expresion e2) {
-    C0::Expresion e3;
-    // TODO(50) Cambiar el uso de table por tstak, siempre obteniendo la tabla que se encuenta en el top de tstack
-    //int type = table->getType(id);
+    //C0::Expresion e3;
     //int dir = table->getDir(id);
     int type = tstack.top()->getType(id);
     //int dir = tstack.top()->getDir(id);
@@ -308,9 +306,9 @@ void C0::Driver::_goto(string label, int n) {
     addQuad(Quad("goto", "", "", l.str()));
 }
 
-void C0::Driver::_label(string label, int n) {
+void C0::Driver::_label(string id) {
     stringstream l;
-    l << label << n;
+    l << id;
     addQuad(Quad("label", "", "", l.str()));
 }
 
@@ -461,9 +459,7 @@ C0::Table* C0::Driver::popTstack(){
 // Como consejo usar la función miembro de Table setBase(Table *t)
 int C0::Driver::addTypeStruct(string name, Table* t){
     int index = tstack.top()->addTypeStruct(name, t);
-    //aqui funciona bien tabla
     //printf("addTypeStruct Driver:\n %s\n\n", t.toString().c_str());
-    //return last_index;
     return index;
 }
 
