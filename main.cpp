@@ -10,7 +10,6 @@ int main(const int argc, const char **argv)
     //if (argc == 2)
     {
         C0::Driver driver;
-        printf("MAIN\n");
         //driver.parse(argv[1]);
         driver.parse("pruebaSemantico");
     }

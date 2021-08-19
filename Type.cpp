@@ -54,6 +54,6 @@ C0::Table* C0::Type::getBase(){
 }
 
 string C0::Type::toString(){
-    string cadena = "TYPE: "+name+" "+to_string(numItems)+" "+to_string(tamBytes)+" "+to_string(baseType)+"\n";
+    string cadena = name+" "+to_string(numItems)+" "+to_string(tamBytes)+" "+to_string(baseType)+"\n";
     return cadena;
 }

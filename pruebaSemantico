@@ -1,16 +1,18 @@
+/*
+int[2][3] myarreglo;
+*/
+
 struct Owo{
     int ab;
     int ac;
 } b;
 
-/*
-int suma(int a, int b){
-    return a;
+
+struct Owo suma(struct Owo myOwo){
+    return myOwo;
 }
-*/
 
 void main(){
-    int miembro;
-    b.ab = miembro;
+    int otro;
     return;
 }

@@ -9,6 +9,7 @@
 
 #include "Expresion.h"
 #include "Structure.h"
+#include "Array.h"
 namespace C0 {
     class Driver;
     class Scanner;
@@ -72,6 +73,7 @@ using namespace std;
 %type<vector<int>> list_args list_params args params parte_array
 %type<Expresion> expresion condicion complemento left_part
 %type<Structure> comp_struct
+%type<Array> array
 
 %%
 program
@@ -600,6 +602,12 @@ complemento
     }
     |
     array
+    {
+        string gId = driver.globalId.top();
+        // checar si se hace pop()
+        driver.globalId.pop();
+        $$ = Expresion($1.dir+"["+gId+"]", $1.type);
+    }
     |
     LPAR list_args RPAR
     {
@@ -642,8 +650,11 @@ complemento
 
             $$ = Expresion(gId, driver.getType(gId));
             //printf("id: %s type:%d\n", $$.getDir().c_str(), $$.getType());
+        }else if (driver.isInSymbolGlobal(gId)){
+            $$ = Expresion(gId, driver.getTypeGlobal(gId));
+
         }else{
-            printf("El id de retorno no está declarado\n");
+            printf("El id de retorno '%s' no está declarado\n", gId.c_str());
             //YYERROR;
         }
     }
@@ -653,12 +664,76 @@ array
     :
     array LCOR expresion RCOR
     {
-    //printf("array \n");
+        string clase = driver.getNameTop($1.type);
+        //printf("name : %s\n", clase.c_str());
+        if (clase == "arreglo"){
+            if ($3.getType() == 1){
+                $$.dir = "";
+                $$.type = driver.getTipoBase($1.type);
+                $$.tam = driver.getTam($$.type);
+                //TODO genCode
+            }else{
+                printf("El índice para un arreglo debe ser entero\n");
+                //YYERROR;
+            }
+        }else if(driver.getNameGlobal($1.type) == "arreglo"){
+            if ($3.getType() == 1){
+                $$.dir = "";
+                $$.type = driver.getTipoBaseGlobal($1.type);
+                $$.tam = driver.getTamGlobal($$.type);
+                //TODO genCode
+            }else{
+                printf("El índice para un arreglo debe ser entero\n");
+                //YYERROR;
+            }
+
+        }else{
+            printf("El arrelo no tiene más dimensiones\n");
+            //YYERROR;
+        }
     }
     |
     LCOR expresion RCOR
     {
-    //printf("array \n");
+        string gId = driver.globalId.top();
+        if (driver.isInSymbol(gId)){
+            if (driver.getClaseTop(gId) == "arreglo"){
+                if ($2.getType() == 1){
+                    $$ = Array();
+                    $$.dir = "";
+                    $$.type = driver.getTipoBase(driver.getType(gId));
+                    $$.tam = driver.getTam($$.type);
+                    //TODO genCode
+
+                }else{
+                    printf("El índice debe ser entero\n");
+                    //YYERROR;
+                }
+            }else{
+                printf("El id %s no es un arreglo\n", gId.c_str());
+                //YYERROR;
+            }
+        }else if(driver.isInSymbolGlobal(gId)){
+            if (driver.getClaseGlobal(gId) == "arreglo"){
+                if ($2.getType() == 1){
+                    $$ = Array();
+                    $$.dir = "";
+                    $$.type = driver.getTipoBaseGlobal(driver.getTypeGlobal(gId));
+                    $$.tam = driver.getTamGlobal($$.type);
+                    //TODO genCode
+                }else{
+                    printf("El índice debe ser entero\n");
+                    //YYERROR;
+                }
+            }else{
+                printf("El id %s no es un arreglo\n", gId.c_str());
+                //YYERROR;
+            }
+
+        }else{
+             printf("El id %s no está declarado\n", gId.c_str());
+            //YYERROR;
+        }
     }
     ;
 
@@ -784,11 +859,10 @@ sentFor
 
 sentAsig
     :
-    left_part
+    left_part ASIG expresion PYC
     {
-        //printf("finish left part\n");
+        //TODO genCode
     }
-    ASIG expresion PYC
     ;
 
 
@@ -810,7 +884,17 @@ left_part
         }
     }
     |
-    ID array
+    ID
+    {
+        driver.globalId.push($1);
+    }
+    array
+    {
+        string gId = driver.globalId.top();
+        driver.globalId.pop();
+
+        $$ = Expresion(gId+"["+$3.dir+"]", $3.type);
+    }
     ;
 
 comp_struct

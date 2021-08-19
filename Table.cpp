@@ -219,9 +219,9 @@ string C0::Table::toString(){
         cadena += symTab[i].toString();
     }
     cadena += "\nTIPOS: "+to_string(typeTab.size())+"\n";
-    cadena += "name numItems tam baseType\n";
+    cadena += "index name numItems tam baseType\n";
     for (int i=0; i<typeTab.size(); i++){
-        cadena += "TYPE "+to_string(i)+": "+typeTab[i].toString();
+        cadena += to_string(i)+": "+typeTab[i].toString();
     }
     cadena += "\n";
 

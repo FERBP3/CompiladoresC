@@ -377,6 +377,10 @@ string C0::Driver::getNameTop(int id){
     return tstack.top()->getName(id);
 }
 
+string C0::Driver::getNameGlobal(int id){
+    return tstack.getGlobal()->getName(id);
+}
+
 string C0::Driver::getClaseTop(string name){
     return tstack.top()->getClase(name);
 }
@@ -390,9 +394,17 @@ int C0::Driver::getTam(int id){
     return tstack.top()->getTam(id);
 }
 
+int C0::Driver::getTamGlobal(int id){
+    return tstack.getGlobal()->getTam(id);
+}
+
 // TODO(56) Programar la funcion miembro que envuelve a getTipoBase de la tabla de tipos
 int C0::Driver::getTipoBase(int id){
     return tstack.top()->getTipoBase(id);
+}
+
+int C0::Driver::getTipoBaseGlobal(int id){
+    return tstack.getGlobal()->getTipoBase(id);
 }
 
 // TODO(57) Programar la funcion miembro que envuelve a getNumImtes de la tabla de tipos

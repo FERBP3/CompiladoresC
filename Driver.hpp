@@ -59,11 +59,17 @@ public:
    /*************************************************************************/
    int addType(string id, int numItems, int tipoBase);
    string getNameTop(int id);
+   string getNameGlobal(int id);
+
    string getClaseTop(string name);
    string getClaseGlobal(string name);
 
    int getTam(int id);
+   int getTamGlobal(int id);
+
    int getTipoBase(int id);
+   int getTipoBaseGlobal(int id);
+
    int getNumItems(int id);
    Table* getBase(int id);
    Table* getBaseGlobal(int id);
