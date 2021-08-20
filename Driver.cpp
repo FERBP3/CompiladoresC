@@ -378,6 +378,10 @@ void C0::Driver::printCI() {
             cout << "\t\t" << q.getOp() << " " << q.getRes() << endl;
         else if (q.getOp() == "call")
             cout << "\t\t" << q.getOp() << " " << q.getArg1() << " " << q.getArg2() << endl;
+        else if (q.getOp() == "putw")
+            cout << "\t\t" << q.getOp() << " " << q.getArg1() << endl;
+        else if (q.getOp() == "puts")
+            cout << "\t\t" << q.getOp() << " " << q.getArg1() << endl;
         else if (q.getArg2() == "")
             cout << "\t\t" << q.getRes() << " = " << q.getOp() << " " << q.getArg1() << endl;
         else

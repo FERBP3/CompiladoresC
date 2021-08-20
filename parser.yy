@@ -82,7 +82,7 @@ program
     }
     declarations
     {
-        printf("FIN programa\n");
+        //printf("FIN programa\n");
         printf("Tabla global\n%s\n", driver.getTablaGlobalString().c_str());
         driver.printCI();
     }
@@ -1082,7 +1082,7 @@ sentAsig
     left_part ASIG expresion PYC
     {
         //genCode
-        printf("id:%s exprDir: %s\n", $1.getDir().c_str(), $3.getDir().c_str());
+        //printf("id:%s exprDir: %s\n", $1.getDir().c_str(), $3.getDir().c_str());
         driver.asign($1.getDir(),$3);
     }
     ;
@@ -1172,14 +1172,18 @@ comp_struct
 
 sentPutw
     :
-    PRINT LPAR expresion
-    RPAR PYC
+    PRINT LPAR expresion RPAR PYC
+    {
+         driver.addQuad(Quad("putw", $3.getDir() ,"",""));
+    }
     ;
 
 sentPuts
     :
-    PRINT LPAR STRING
-    RPAR PYC
+    PRINT LPAR STRING RPAR PYC
+    {
+        driver.addQuad(Quad("puts", $3 ,"",""));
+    }
     ;
 
 sentBreak

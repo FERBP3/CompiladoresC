@@ -1,21 +1,26 @@
-int x, y;
+int[3][4] x, y;
 
 struct {
     int a;
     int b;
-}a, b;
+} m, h;
 
-int[2][2] g;
+int suma(int a, int b){
+    int c;
+    c = a + b;
+    return c;
+}
 
-func void main(){
-    while(x>4  ){
-        if(y== 6 ){
-            x= 7;
-        }else{
-            y=3;
-        }
-        x = x+1;
-    }   
-    print(y);
-    print("El factorial de 6 es :");
+int resta(int a, int b){
+    int c;
+    c = a - b;
+    return c;
+}
+
+void main(){
+    int w, z;
+    z = 10;
+    w = 5;
+    z = suma(z, w);
+    w = resta(z, w);
 }

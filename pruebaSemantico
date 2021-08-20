@@ -27,6 +27,7 @@ void main(){
     for (myInt = 1 ; myInt < 4 ; myInt = myInt+1;){
         myInt = 4;
     }
+    print("kasd");
 
     /*
     if (myInt < 3){
