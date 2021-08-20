@@ -483,7 +483,6 @@ sentReturn
     RETURN expresion PYC
     {
         driver.gReturnList.push_back($2.getType());
-        //TODO genCode
     }
     |
     RETURN PYC
@@ -509,8 +508,7 @@ sentProc
                         YYERROR;
                     }
                 }
-                //TODO genCode
-                //driver.();
+                driver._call($1, args.size());
             }
         }else{
             printf("El id no existe o no hace referencia a una función\n");
@@ -647,6 +645,7 @@ expresion
     NUMERO
     {
         // Por ahora solo es entero
+        //printf("numero: %s\n", $1.c_str());
         $$ = Expresion($1, 1);
     }
     |
@@ -704,9 +703,8 @@ complemento
                         break;
                     }
                 }
-                // TODO nuevaTemporal ?
                 $$ = Expresion(gId, driver.getTypeGlobal(gId));
-                //TODO genCode
+                driver._call(gId, args.size());
             }
         }else{
             printf("El id %s no existe o no hace referencia a una función\n", gId.c_str());
@@ -742,20 +740,28 @@ array
         //printf("name : %s\n", clase.c_str());
         if (clase == "arreglo"){
             if ($3.getType() == 1){
-                $$.dir = "";
+                string temp = driver.newTemp();
+                $$.dir = driver.newTemp();
                 $$.type = driver.getTipoBase($1.type);
                 $$.tam = driver.getTam($$.type);
-                //TODO genCode
+                //genCode
+                driver.addQuad(Quad("*", $3.getDir(), to_string($$.tam), temp));
+                driver.addQuad(Quad("+", $1.dir, temp, $$.dir));
+
             }else{
                 printf("El índice para un arreglo debe ser entero\n");
                 YYERROR;
             }
         }else if(driver.getNameGlobal($1.type) == "arreglo"){
             if ($3.getType() == 1){
-                $$.dir = "";
+                string temp = driver.newTemp();
+                $$.dir = driver.newTemp();
                 $$.type = driver.getTipoBaseGlobal($1.type);
                 $$.tam = driver.getTamGlobal($$.type);
-                //TODO genCode
+                //genCode
+                driver.addQuad(Quad("*", $3.getDir(), to_string($$.tam), temp));
+                driver.addQuad(Quad("+", $1.dir, temp, $$.dir));
+
             }else{
                 printf("El índice para un arreglo debe ser entero\n");
                 YYERROR;
@@ -774,10 +780,11 @@ array
             if (driver.getClaseTop(gId) == "arreglo"){
                 if ($2.getType() == 1){
                     $$ = Array();
-                    $$.dir = "";
+                    $$.dir = driver.newTemp();
                     $$.type = driver.getTipoBase(driver.getType(gId));
                     $$.tam = driver.getTam($$.type);
-                    //TODO genCode
+                    //genCode
+                    driver.addQuad(Quad("*", $2.getDir(), to_string($$.tam), $$.dir));
 
                 }else{
                     printf("El índice debe ser entero\n");
@@ -791,10 +798,12 @@ array
             if (driver.getClaseGlobal(gId) == "arreglo"){
                 if ($2.getType() == 1){
                     $$ = Array();
-                    $$.dir = "";
+                    $$.dir = driver.newTemp();
                     $$.type = driver.getTipoBaseGlobal(driver.getTypeGlobal(gId));
                     $$.tam = driver.getTamGlobal($$.type);
-                    //TODO genCode
+                    //genCode
+                    driver.addQuad(Quad("*", $2.getDir(), to_string($$.tam), $$.dir));
+
                 }else{
                     printf("El índice debe ser entero\n");
                     YYERROR;
@@ -964,7 +973,7 @@ condicion
 sentIf
     : IF LPAR
     {
-        driver.numIf += 1;
+        driver.numLabel += 1;
         driver.pilaLabel->push(driver.numIf);
     }
     condicion
@@ -980,7 +989,7 @@ sentIf
     {
         driver._label("LFIN"+to_string(driver.pilaLabel->top()));
         driver.pilaLabel->pop();
-        driver.numIf--;
+        //driver.numIf--;
     }
     ;
 
@@ -994,9 +1003,23 @@ sentElse
 sentWhile
     :
     WHILE LPAR
+    {
+        driver.numLabel++;
+        driver.pilaLabel->push(driver.numLabel);
+        driver.addQuad(Quad("label", "", "", "LINI"+to_string(driver.pilaLabel->top())));
+    }
     condicion
+    {
+        driver.addQuad(Quad("ifFalse", $4.getDir(), "goto", "LFIN"+to_string(driver.pilaLabel->top())));
+    }
     RPAR
     bloqueOSentencia
+    {
+        driver.addQuad(Quad("goto", "", "", "LINI"+to_string(driver.pilaLabel->top())));
+
+        driver.addQuad(Quad("label", "", "", "LFIN"+to_string(driver.pilaLabel->top())));
+        driver.pilaLabel->pop();
+    }
     ;
 
 sentSwitch
@@ -1029,19 +1052,37 @@ predeterminado
 sentFor
     :
     FOR
-    LPAR sentAsig
-    PYC expresion
+    LPAR
+    {
+        driver.numLabel++;
+        driver.sLabel->push(driver.numLabel);
+        driver.addQuad(Quad("label", "", "", "LINI"+to_string(driver.sLabel->top())));
+    }
+    sentAsig
+    {
+        /* Se le quita PYC porque sentAsig ya acaba con PYC */
+    }
+    condicion
+    {
+        driver.addQuad(Quad("ifFalse", $6.getDir(), "goto", "LFIN"+to_string(driver.sLabel->top())));
+    }
+    PYC
+    sentAsig
     RPAR
     bloqueOSentencia
+    {
+        driver.addQuad(Quad("goto", "", "", "LINI"+to_string(driver.sLabel->top())));
+        driver.addQuad(Quad("label", "", "", "LFIN"+to_string(driver.sLabel->top())));
+        driver.sLabel->pop();
+    }
     ;
 
 sentAsig
     :
     left_part ASIG expresion PYC
     {
-        //TODO genCode
-        // reducir
-        //printf("id:%s exprDir: %s\n", $1.getDir().c_str(), $3.getDir().c_str());
+        //genCode
+        printf("id:%s exprDir: %s\n", $1.getDir().c_str(), $3.getDir().c_str());
         driver.asign($1.getDir(),$3);
     }
     ;
@@ -1143,6 +1184,10 @@ sentPuts
 
 sentBreak
     : BREAK PYC
+    {
+        string sLabelTop = to_string(driver.sLabel->top());
+        driver.addQuad(Quad("goto", "", "", "LFIN"+sLabelTop));
+    }
     ;
 
 bloqueOSentencia

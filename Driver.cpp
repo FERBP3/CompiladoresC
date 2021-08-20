@@ -56,6 +56,7 @@ void C0::Driver::init() {
     gDir = 0;
     iStack = new PilaCount();
     wStack = new PilaCount();
+    numLabel = 0;
     numIf = 0;
     numWhile = 0;
     numTemp = 0;
@@ -67,6 +68,7 @@ void C0::Driver::init() {
     dirStack = new PilaCount();
     typeStack = new PilaCount();
     pilaLabel = new PilaCount();
+    sLabel = new PilaCount();
     //gId = "";
 }
 
@@ -324,8 +326,12 @@ C0::Expresion C0::Driver::_not(Expresion e1){
 }
 
 void C0::Driver::asign(string id, Expresion e2) {
-    int type = tstack.top()->getType(id);
-    if (type == e2.getType()) {
+    int typeTop = tstack.top()->getType(id);
+    int typeGlobal = tstack.getGlobal()->getType(id);
+
+    if (typeTop == e2.getType()) {
+        addQuad(Quad("=", e2.getDir(), "", id));
+    }else if(typeGlobal == e2.getType()){
         addQuad(Quad("=", e2.getDir(), "", id));
     }
 }
@@ -355,25 +361,27 @@ void C0::Driver::_label(string id) {
     addQuad(Quad("label", "", "", l.str()));
 }
 
+void C0::Driver::_call(string id, int num){
+    addQuad(Quad("call", id, to_string(num), ""));
+}
+
 void C0::Driver::printCI() {
     cout << "Codigo intermedio " << ci.size() << endl;
     for (Quad q : ci) {
         if (q.getOp() == "=")
             cout << "\t\t" << q.getRes() << " " << q.getOp() << " " << q.getArg1() << endl;
-
         else if (q.getOp() == "label")
             cout << q.getRes() << ": " << endl;
         else if (q.getOp() == "ifFalse")
             cout << "\t\t" << q.getOp() << " " << q.getArg1() << " goto " << q.getRes() << endl;
-
         else if (q.getOp() == "goto")
             cout << "\t\t" << q.getOp() << " " << q.getRes() << endl;
-
+        else if (q.getOp() == "call")
+            cout << "\t\t" << q.getOp() << " " << q.getArg1() << " " << q.getArg2() << endl;
         else if (q.getArg2() == "")
             cout << "\t\t" << q.getRes() << " = " << q.getOp() << " " << q.getArg1() << endl;
         else
             cout << "\t\t" << q.getRes() << " = " << q.getArg1() << " " << q.getOp() << " " << q.getArg2() << endl;
-
     }
 }
 

@@ -106,10 +106,11 @@ public:
    /*     FUNCIONES QUE GENERAN CÓDIGO INTERMEDIO */
    /***********************************************/ 
    void addQuad(Quad q)  ;
-   void _if(Expresion e, int n);   
-   void _while(Expresion e, int n);   
+   void _if(Expresion e, int n);
+   void _while(Expresion e, int n);
    void _goto(string label, int n);
    void _label(string id);
+   void _call(string id, int num);
    string newLabel(int n);
    string newTemp();
    void printCI();
@@ -135,6 +136,7 @@ public:
    PilaCount *iStack;
    PilaCount *wStack;
    int numTemp;
+   int numLabel;
    int numIf;
    int numString;
    int numWhile;
@@ -143,16 +145,14 @@ public:
    vector<Quad> ci;
    int current_type;
    vector<string> strings;
-   // TODO(30) Agregar una variable entera llamada gType
    int gType;
-   // TODO(31) Agregar una variable entera llamada gBase
    int gBase;
-   // TODO(38) Crear una variable miembro llamada dirStack de tipo apuntador a PilaCount
    PilaCount* dirStack;
    PilaCount* typeStack;
    vector<int> gReturnList;
    stack<string> globalId;
    PilaCount *pilaLabel;
+   PilaCount *sLabel;
    //string gId;
 };
 }

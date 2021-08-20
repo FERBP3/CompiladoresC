@@ -1,4 +1,6 @@
 int myInt;
+double myDouble;
+
 /*
 int[2][3] myarreglo;
 
@@ -16,18 +18,26 @@ struct Owo suma(struct Owo myOwo){
     return myOwo;
 }
 
+int suma(int a){
+    return a;
+}
 */
+
 void main(){
-    double myDouble;
-    int res;
-    /*
-    res = 4 % 7 % 8;
-    */
-    if (!(myInt == 3)){
-        res = 3;
+    for (myInt = 1 ; myInt < 4 ; myInt = myInt+1;){
+        myInt = 4;
     }
 
     /*
+    if (myInt < 3){
+        myInt = 5;
+    }
+
+
+    myarreglo[2][2] = 4;
+    myInt = suma(myInt);
+    res = 4 % 7 % 8;
+
     else if (myInt == 3){
         res = 3;
     }else{
