@@ -85,14 +85,19 @@ public:
    Expresion sub(Expresion e1, Expresion e2);
    Expresion mul(Expresion e1, Expresion e2);
    Expresion div(Expresion e1, Expresion e2);
+   Expresion mod(Expresion e1, Expresion e2);
    Expresion number(string num);
    Expresion ident(string id);
    Expresion _or(Expresion e1, Expresion e2);
    Expresion _and(Expresion e1, Expresion e2);
    Expresion gt(Expresion e1, Expresion e2);
+   Expresion gte(Expresion e1, Expresion e2);
    Expresion lt(Expresion e1, Expresion e2);
+   Expresion lte(Expresion e1, Expresion e2);
    Expresion equal(Expresion e1, Expresion e2);
    Expresion distinct(Expresion e1, Expresion e2);
+   Expresion _not(Expresion e1);
+
    void asign(string id, Expresion e2); 
    void writew(Expresion e);
    void writes(string s, int c);
@@ -147,6 +152,7 @@ public:
    PilaCount* typeStack;
    vector<int> gReturnList;
    stack<string> globalId;
+   PilaCount *pilaLabel;
    //string gId;
 };
 }

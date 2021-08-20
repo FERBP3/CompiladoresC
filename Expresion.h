@@ -15,6 +15,8 @@ class Expresion{
     ~Expresion();
     int getType();
     string getDir();
+    void setDir(string dir);
+    void setType(int type);
 };
 }
 #endif

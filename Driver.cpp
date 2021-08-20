@@ -66,6 +66,7 @@ void C0::Driver::init() {
     output = filename.substr(0,pos-1)+".ens";
     dirStack = new PilaCount();
     typeStack = new PilaCount();
+    pilaLabel = new PilaCount();
     //gId = "";
 }
 
@@ -159,6 +160,7 @@ C0::Expresion C0::Driver::add(Expresion e1, Expresion e2) {
         addQuad(Quad("+", e1.getDir(), e2.getDir(), e.getDir()));
         return e;
     }
+    e.setType(-1);
     return e;
 }
 
@@ -169,6 +171,7 @@ C0::Expresion C0::Driver::sub(Expresion e1, Expresion e2) {
         addQuad(Quad("-", e1.getDir(), e2.getDir(), e3.getDir()));
         return e3;
     }
+    e3.setType(-1);
     return e3;
 }
 
@@ -179,6 +182,7 @@ C0::Expresion C0::Driver::mul(Expresion e1, Expresion e2) {
         addQuad(Quad("*", e1.getDir(), e2.getDir(), e3.getDir()));
         return e3;
     }
+    e3.setType(-1);
     return e3;
 }
 
@@ -189,7 +193,20 @@ C0::Expresion C0::Driver::div(Expresion e1, Expresion e2) {
         addQuad(Quad("/", e1.getDir(), e2.getDir(), e3.getDir()));
         return e3;
     }
+    e3.setType(-1);
     return e3;
+}
+
+C0::Expresion C0::Driver::mod(Expresion e1, Expresion e2){
+    Expresion e3;
+    if (e1.getType() == e2.getType()) {
+        e3 = Expresion(newTemp(), e1.getType());
+        addQuad(Quad("%", e1.getDir(), e2.getDir(), e3.getDir()));
+        return e3;
+    }
+    e3.setType(-1);
+    return e3;
+
 }
 
 C0::Expresion C0::Driver::number(string num) {
@@ -215,9 +232,10 @@ C0::Expresion C0::Driver::_or(Expresion e1, Expresion e2) {
     Expresion e3;
     if (e1.getType() == e2.getType()) {
         e3 = Expresion(newTemp(), e1.getType());
-        addQuad(Quad("or", e1.getDir(), e2.getDir(), e2.getDir()));
+        addQuad(Quad("or", e1.getDir(), e2.getDir(), e3.getDir()));
         return e3;
     }
+    e3.setType(-1);
     return e3;
 }
 
@@ -228,6 +246,7 @@ C0::Expresion C0::Driver::_and(Expresion e1, Expresion e2) {
         addQuad(Quad("and", e1.getDir(), e2.getDir(), e3.getDir()));
         return e3;
     }
+    e3.setType(-1);
     return e3;
 }
 
@@ -238,8 +257,21 @@ C0::Expresion C0::Driver::gt(Expresion e1, Expresion e2) {
         addQuad(Quad(">", e1.getDir(), e2.getDir(), e3.getDir()));
         return e3;
     }
+    e3.setType(-1);
     return e3;
 }
+
+C0::Expresion C0::Driver::gte(Expresion e1, Expresion e2) {
+    Expresion e3;
+    if (e1.getType() == e2.getType()) {
+        e3 = Expresion(newTemp(), e1.getType());
+        addQuad(Quad(">=", e1.getDir(), e2.getDir(), e3.getDir()));
+        return e3;
+    }
+    e3.setType(-1);
+    return e3;
+}
+
 
 C0::Expresion C0::Driver::lt(Expresion e1, Expresion e2) {
     Expresion e3;
@@ -248,6 +280,18 @@ C0::Expresion C0::Driver::lt(Expresion e1, Expresion e2) {
         addQuad(Quad("<", e1.getDir(), e2.getDir(), e3.getDir()));
         return e3;
     }
+    e3.setType(-1);
+    return e3;
+}
+
+C0::Expresion C0::Driver::lte(Expresion e1, Expresion e2) {
+    Expresion e3;
+    if (e1.getType() == e2.getType()) {
+        e3 = Expresion(newTemp(), e1.getType());
+        addQuad(Quad("<=", e1.getDir(), e2.getDir(), e3.getDir()));
+        return e3;
+    }
+    e3.setType(-1);
     return e3;
 }
 
@@ -258,6 +302,7 @@ C0::Expresion C0::Driver::equal(Expresion e1, Expresion e2) {
         addQuad(Quad("==", e1.getDir(), e2.getDir(), e3.getDir()));
         return e3;
     }
+    e3.setType(-1);
     return e3;
 }
 
@@ -268,29 +313,27 @@ C0::Expresion C0::Driver::distinct(Expresion e1, Expresion e2) {
         addQuad(Quad("!=", e1.getDir(), e2.getDir(), e3.getDir()));
         return e3;
     }
+    e3.setType(-1);
     return e3;
 }
 
+C0::Expresion C0::Driver::_not(Expresion e1){
+    Expresion e2 = Expresion(newTemp(), e1.getType());
+    addQuad(Quad("!", e1.getDir(), "", e2.getDir()));
+    return e2;
+}
+
 void C0::Driver::asign(string id, Expresion e2) {
-    //C0::Expresion e3;
-    //int dir = table->getDir(id);
     int type = tstack.top()->getType(id);
-    //int dir = tstack.top()->getDir(id);
     if (type == e2.getType()) {
         addQuad(Quad("=", e2.getDir(), "", id));
     }
 }
 
-/*
-void C0::Driver::addQuad(Quad q) {
-    ci.push_back(q);
-}
-*/
-
 void C0::Driver::_if(Expresion e, int n) {
     stringstream l;
-    l << "Le" << n;
-    addQuad(Quad("ifFalse", e.getDir(), "", l.str()));
+    l << n;
+    addQuad(Quad("ifFalse", e.getDir(), "goto", "LELSE"+l.str()));
 }
 
 void C0::Driver::_while(Expresion e, int n) {
@@ -317,16 +360,20 @@ void C0::Driver::printCI() {
     for (Quad q : ci) {
         if (q.getOp() == "=")
             cout << "\t\t" << q.getRes() << " " << q.getOp() << " " << q.getArg1() << endl;
+
         else if (q.getOp() == "label")
             cout << q.getRes() << ": " << endl;
         else if (q.getOp() == "ifFalse")
             cout << "\t\t" << q.getOp() << " " << q.getArg1() << " goto " << q.getRes() << endl;
+
         else if (q.getOp() == "goto")
             cout << "\t\t" << q.getOp() << " " << q.getRes() << endl;
+
         else if (q.getArg2() == "")
             cout << "\t\t" << q.getRes() << " = " << q.getOp() << " " << q.getArg1() << endl;
         else
             cout << "\t\t" << q.getRes() << " = " << q.getArg1() << " " << q.getOp() << " " << q.getArg2() << endl;
+
     }
 }
 

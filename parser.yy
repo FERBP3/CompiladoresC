@@ -36,8 +36,6 @@ namespace C0 {
 using namespace std;
 
 #include "Driver.hpp"
-// TODO(62) Definir una variable externa numType: int
-//extern int numType;
 
 #undef yylex
 #define yylex scanner.yylex
@@ -128,7 +126,7 @@ var
     {
         if(driver.isInSymbol($1) || driver.gBase == 0){
             printf("La variable '%s' ya fue declarada o no puede ser de tipo void\n", $1.c_str());
-            //YYERROR;
+            YYERROR;
         }else{
             driver.addSymbol($1);
             driver.setType($1, driver.gType);
@@ -158,18 +156,18 @@ type
                 $$ = driver.getType($2);
             }else{
                 printf("El ID no representa un estructura\n");
-                //YYERROR;
+                YYERROR;
             }
         }else if (driver.isInSymbolGlobal($2)){
             if (driver.getClaseGlobal($2) == "struct"){
                 $$ = driver.getTypeGlobal($2);
             }else{
                 printf("El ID no representa un estructura\n");
-                //YYERROR;
+                YYERROR;
             }
         }else{
             printf("El id no existe\n");
-            //YYERROR;
+            YYERROR;
         }
     }
     ;
@@ -211,7 +209,7 @@ comp_arreglo
 
         }else{
             printf("El indice debe ser mayor a cero\n");
-            //YYERROR;
+            YYERROR;
         }
     }
     |
@@ -236,7 +234,6 @@ decl_struct
     |
     STRUCT ID
     {
-        //printf("aqui");
         driver.pushTstack();
         driver.dirStack->push(driver.gDir);
         driver.gDir = 0;
@@ -258,12 +255,11 @@ decl_struct
         printf("%s\ntabla:%s\n\n",t.toString().c_str(), t.getBase()->toString().c_str());
         */
 
-        // aqui funciona bien la tabla
         //printf("Tabla STRUCT\n%s\n\n", tabla.toString().c_str());
 
         if (driver.isInSymbol($2)){
             printf("La variable ya fue declarada\n");
-            //YYERROR;
+            YYERROR;
         }else{
             driver.addSymbol($2);
             driver.setType($2, driver.gType);
@@ -299,12 +295,12 @@ decl_fun
 
         if (driver.isInSymbol($1)){
             printf("El id de la funcion ya fue declarado\n");
-            //YYERROR;
+            YYERROR;
         }else{
             for(int i=0; i<driver.gReturnList.size(); i++){
                 if (driver.gReturnList[i] != current_type_fun){
                     printf("La sentencia de retorno no devuelve el tipo correcto de dato\n");
-                    //YYERROR;
+                    YYERROR;
                 }
             }
             driver.addSymbol($1);
@@ -351,7 +347,7 @@ param
     {
         if (driver.isInSymbol($2)){
             printf("El id de la funcion ya fue declarado\n");
-            //YYERROR;
+            YYERROR;
         }else{
             driver.addSymbol($2);
             driver.setType($2, $1);
@@ -387,7 +383,7 @@ type_param
                 $$ = driver.getType($2);
             }else{
                 printf("El id no representa una estructura\n");
-                //YYERROR;
+                YYERROR;
             }
 
         }else if (driver.isInSymbolGlobal($2)){
@@ -395,11 +391,11 @@ type_param
                 $$ = driver.getTypeGlobal($2);
             }else{
                 printf("El id no representa una estructura\n");
-                //YYERROR;
+                YYERROR;
             }
         }else{
             printf("El id no esta declarado\n");
-            //YYERROR;
+            YYERROR;
         }
     }
     ;
@@ -505,19 +501,20 @@ sentProc
             vector<int> args = driver.getArgsGlobal($1);
             if (args.size() != $3.size()){
                 printf("El numero de argumentos no coincide\n");
-                //YYERROR;
+                YYERROR;
             }else{
                 for (int i=0; i<args.size(); i++){
                     if (args[i] != $3[i]){
                         printf("El tipo de argumentos no coincide\n");
-                        //YYERROR;
+                        YYERROR;
                     }
                 }
                 //TODO genCode
+                //driver.();
             }
         }else{
             printf("El id no existe o no hace referencia a una función\n");
-            //YYERROR;
+            YYERROR;
         }
     }
     ;
@@ -558,16 +555,94 @@ arg
 expresion
     :
     expresion MAS expresion 
+    {
+        $$ = Expresion();
+        if ($1.getType() > $3.getType()){
+            $$.setType($1.getType());
+        }else{
+            $$.setType($3.getType());
+        }
+
+        Expresion t = driver.add($1, $3);
+        if (t.getType() == -1){
+            printf("Los tipos de suma no son compatibles\n");
+            YYERROR;
+        }
+        $$.setDir(t.getDir());
+    }
     |
     expresion MENOS expresion
+    {
+        $$ = Expresion();
+        if ($1.getType() > $3.getType()){
+            $$.setType($1.getType());
+        }else{
+            $$.setType($3.getType());
+        }
+
+        Expresion t = driver.sub($1, $3);
+        if (t.getType() == -1){
+            printf("Los tipos de resta no son compatibles\n");
+            YYERROR;
+        }
+        $$.setDir(t.getDir());
+    }
     |
     expresion MUL expresion
+    {
+        $$ = Expresion();
+        if ($1.getType() > $3.getType()){
+            $$.setType($1.getType());
+        }else{
+            $$.setType($3.getType());
+        }
+
+        Expresion t = driver.mul($1, $3);
+        if (t.getType() == -1){
+            printf("Los tipos de multiplicación no son compatibles\n");
+            YYERROR;
+        }
+        $$.setDir(t.getDir());
+    }
     |
     expresion DIV expresion
+    {
+        $$ = Expresion();
+        if ($1.getType() > $3.getType()){
+            $$.setType($1.getType());
+        }else{
+            $$.setType($3.getType());
+        }
+
+        Expresion t = driver.div($1, $3);
+        if (t.getType() == -1){
+            printf("Los tipos de división no son compatibles\n");
+            YYERROR;
+        }
+        $$.setDir(t.getDir());
+    }
     |
     expresion MOD expresion
+    {
+        $$ = Expresion();
+        if ($1.getType() > $3.getType()){
+            $$.setType($1.getType());
+        }else{
+            $$.setType($3.getType());
+        }
+
+        Expresion t = driver.mod($1, $3);
+        if (t.getType() == -1){
+            printf("Los tipos de módulo no son compatibles\n");
+            YYERROR;
+        }
+        $$.setDir(t.getDir());
+    }
     |
     LPAR expresion RPAR
+    {
+        $$ = $2;
+    }
     |
     NUMERO
     {
@@ -620,12 +695,12 @@ complemento
             vector<int> args = driver.getArgsGlobal(gId);
             if (args.size() != $2.size()){
                 printf("El numero de argumentos no coincide\n");
-                //YYERROR;
+                YYERROR;
             }else{
                 for (int i=0; i<args.size(); i++){
                     if (args[i] != $2[i]){
                         printf("El tipo de argumentos no coincide\n");
-                        //YYERROR;
+                        YYERROR;
                         break;
                     }
                 }
@@ -635,7 +710,7 @@ complemento
             }
         }else{
             printf("El id %s no existe o no hace referencia a una función\n", gId.c_str());
-            //YYERROR;
+            YYERROR;
         }
     }
     |
@@ -654,7 +729,7 @@ complemento
 
         }else{
             printf("El id de retorno '%s' no está declarado\n", gId.c_str());
-            //YYERROR;
+            YYERROR;
         }
     }
     ;
@@ -673,7 +748,7 @@ array
                 //TODO genCode
             }else{
                 printf("El índice para un arreglo debe ser entero\n");
-                //YYERROR;
+                YYERROR;
             }
         }else if(driver.getNameGlobal($1.type) == "arreglo"){
             if ($3.getType() == 1){
@@ -683,12 +758,12 @@ array
                 //TODO genCode
             }else{
                 printf("El índice para un arreglo debe ser entero\n");
-                //YYERROR;
+                YYERROR;
             }
 
         }else{
             printf("El arrelo no tiene más dimensiones\n");
-            //YYERROR;
+            YYERROR;
         }
     }
     |
@@ -706,11 +781,11 @@ array
 
                 }else{
                     printf("El índice debe ser entero\n");
-                    //YYERROR;
+                    YYERROR;
                 }
             }else{
                 printf("El id %s no es un arreglo\n", gId.c_str());
-                //YYERROR;
+                YYERROR;
             }
         }else if(driver.isInSymbolGlobal(gId)){
             if (driver.getClaseGlobal(gId) == "arreglo"){
@@ -722,16 +797,16 @@ array
                     //TODO genCode
                 }else{
                     printf("El índice debe ser entero\n");
-                    //YYERROR;
+                    YYERROR;
                 }
             }else{
                 printf("El id %s no es un arreglo\n", gId.c_str());
-                //YYERROR;
+                YYERROR;
             }
 
         }else{
              printf("El id %s no está declarado\n", gId.c_str());
-            //YYERROR;
+            YYERROR;
         }
     }
     ;
@@ -740,31 +815,173 @@ array
 condicion
     :
     condicion OR condicion
+    {
+        $$ = Expresion();
+        if ($1.getType() > $3.getType()){
+            $$.setType($1.getType());
+        }else{
+            $$.setType($3.getType());
+        }
+
+        Expresion t = driver._or($1, $3);
+        if (t.getType() == -1){
+            printf("Los tipos de OR no son compatibles\n");
+            YYERROR;
+        }
+        $$.setDir(t.getDir());
+    }
     |
     condicion AND condicion
+    {
+        $$ = Expresion();
+        if ($1.getType() > $3.getType()){
+            $$.setType($1.getType());
+        }else{
+            $$.setType($3.getType());
+        }
+
+        Expresion t = driver._and($1, $3);
+        if (t.getType() == -1){
+            printf("Los tipos de AND no son compatibles\n");
+            YYERROR;
+        }
+        $$.setDir(t.getDir());
+    }
     |
     expresion EQUAL expresion
+    {
+        $$ = Expresion();
+        if ($1.getType() > $3.getType()){
+            $$.setType($1.getType());
+        }else{
+            $$.setType($3.getType());
+        }
+
+        Expresion t = driver.equal($1, $3);
+        if (t.getType() == -1){
+            printf("Los tipos de OR no son compatibles\n");
+            YYERROR;
+        }
+        $$.setDir(t.getDir());
+    }
     |
     expresion DISTINCT expresion
+    {
+        $$ = Expresion();
+        if ($1.getType() > $3.getType()){
+            $$.setType($1.getType());
+        }else{
+            $$.setType($3.getType());
+        }
+
+        Expresion t = driver.distinct($1, $3);
+        if (t.getType() == -1){
+            printf("Los tipos del operador != no son compatibles\n");
+            YYERROR;
+        }
+        $$.setDir(t.getDir());
+    }
     |
     expresion GT expresion
+    {
+        $$ = Expresion();
+        if ($1.getType() > $3.getType()){
+            $$.setType($1.getType());
+        }else{
+            $$.setType($3.getType());
+        }
+
+        Expresion t = driver.gt($1, $3);
+        if (t.getType() == -1){
+            printf("Los tipos del operador > no son compatibles\n");
+            YYERROR;
+        }
+        $$.setDir(t.getDir());
+    }
     |
     expresion LT expresion
+    {
+        $$ = Expresion();
+        if ($1.getType() > $3.getType()){
+            $$.setType($1.getType());
+        }else{
+            $$.setType($3.getType());
+        }
+
+        Expresion t = driver.lt($1, $3);
+        if (t.getType() == -1){
+            printf("Los tipos del operador < no son compatibles\n");
+            YYERROR;
+        }
+        $$.setDir(t.getDir());
+    }
     |
     expresion GTE expresion
+    {
+        $$ = Expresion();
+        if ($1.getType() > $3.getType()){
+            $$.setType($1.getType());
+        }else{
+            $$.setType($3.getType());
+        }
+
+        Expresion t = driver.gte($1, $3);
+        if (t.getType() == -1){
+            printf("Los tipos del operador >= no son compatibles\n");
+            YYERROR;
+        }
+        $$.setDir(t.getDir());
+    }
     |
     expresion LTE expresion
+    {
+        $$ = Expresion();
+        if ($1.getType() > $3.getType()){
+            $$.setType($1.getType());
+        }else{
+            $$.setType($3.getType());
+        }
+
+        Expresion t = driver.lte($1, $3);
+        if (t.getType() == -1){
+            printf("Los tipos del operador <= no son compatibles\n");
+            YYERROR;
+        }
+        $$.setDir(t.getDir());
+    }
     |
     NOT condicion
+    {
+        $$ = driver._not($2);
+    }
     |
     LPAR condicion RPAR
+    {
+        $$ = $2;
+    }
     ;
 
 sentIf
     : IF LPAR
+    {
+        driver.numIf += 1;
+        driver.pilaLabel->push(driver.numIf);
+    }
     condicion
+    {
+        driver._if($4, driver.pilaLabel->top());
+    }
     RPAR bloqueOSentencia
+    {
+        driver._goto("LFIN", driver.pilaLabel->top());
+        driver._label("LELSE"+to_string(driver.pilaLabel->top()));
+    }
     sentElse
+    {
+        driver._label("LFIN"+to_string(driver.pilaLabel->top()));
+        driver.pilaLabel->pop();
+        driver.numIf--;
+    }
     ;
 
 sentElse
@@ -785,20 +1002,9 @@ sentWhile
 sentSwitch
     :
     SWITCH
-    {
-    //printf("switch token \n");
-    }
-
     LPAR expresion
-    {
-    //printf("switch expresion \n");
-    }
-
     RPAR LKEY body_switch
     RKEY
-    {
-    //printf("switch body \n");
-    }
     ;
 
 body_switch
@@ -823,37 +1029,10 @@ predeterminado
 sentFor
     :
     FOR
-    {
-    //printf("finish for token\n");
-    }
     LPAR sentAsig
-    {
-    //printf("finish sentAsig\n");
-    }
-
-    {
-    //printf("finish pyc for\n");
-    }
-
-    condicion
-    {
-    //printf("finish condicion\n");
-    }
-
     PYC expresion
-    {
-    //printf("finish expresion \n");
-    }
-
     RPAR
-    {
-    //printf("finish ) for \n");
-    }
-
     bloqueOSentencia
-    {
-    //printf("finish bloqueOSentencia\n");
-    }
     ;
 
 sentAsig
@@ -862,6 +1041,7 @@ sentAsig
     {
         //TODO genCode
         // reducir
+        //printf("id:%s exprDir: %s\n", $1.getDir().c_str(), $3.getDir().c_str());
         driver.asign($1.getDir(),$3);
     }
     ;
@@ -912,11 +1092,11 @@ comp_struct
             }else{
             printf("El id: '%s' no es un miembro de la estructura %s\n", $3.c_str(), $1.base.c_str());
             //printf("Tabla STRUCT\n%s\n\n", $1.tabla->toString().c_str());
-            //YYERROR;
+            YYERROR;
             }
         }else{
             printf("El comp_struct1.base: '%s' no es una estructura\n", $1.base.c_str());
-            //YYERROR;
+            YYERROR;
         }
     }
     |
@@ -944,7 +1124,7 @@ comp_struct
             //printf("Tabla STRUCT\n%s\n\n", $$.tabla->toString().c_str());
         }else{
             printf("El id '%s' no fue declarado\n", gId.c_str());
-            //YYERROR;
+            YYERROR;
         }
     }
     ;
